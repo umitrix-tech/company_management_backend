@@ -12,8 +12,216 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHERS
+}
+
+enum UserStates {
+  ACTIVE
+  INACTIVE
+}
+
+enum PlanType {
+  FREE
+  MONTH_PAY
+  YEAR_PAY
+  SOLD
+}
+
+model CompanyConfig {
+  id                Int     @id @default(autoincrement())
+  isCompanyWentTour Boolean
+  themeSetting      Json    @default("{}")
+}
+
+model PlanHistory {
+  id         BigInt   @id @default(autoincrement())
+  isActive   Boolean  @default(false)
+  version    Decimal  @default(1.0)
+  tierOfPlan PlanType
+  startDate  DateTime @default(now())
+  endDate    DateTime
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+}
+
+model Company {
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  address1               String
+  address2               String?
+  logoUrl                String?
+  email                  String                   @unique
+  phone                  String
+  gstinNumber            String?
+  sacNumber              String?
+  panNumber              String?
+  esicNumber             String?
+  epfNumber              String?
+  serviceTaxNumber       String?
+  websiteLink            String?
+  documets               String[]                 @default([])
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  users                  User[]
+  PunchLog               PunchLog[]
+  WorkHoursConfiguration WorkHoursConfiguration[]
+  particularDateConfigs  ParticularDateConfig[]
+  salaryDesigns          SalaryDesign[]
+  roles                  Role[]
+  planHistories          PlanHistory[]
+}
+
+model Role {
+  id         Int    @id @default(autoincrement())
+  name       String
+  privileges Json   @default("{}")
+  users      User[]
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+}
 
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
+  id              BigInt     @id @default(autoincrement())
+  name            String
+  empCode         String     @unique
+  adharNumber     String?    @unique
+  uanNumber       String?    @unique
+  bankAccount     String?
+  address         String?
+  city            String
+  pinCode         String
+  state           String
+  country         String
+  email           String?
+  bloodGroup      String?
+  ifscCode        String?
+  gender          Gender
+  epfNumber       String?
+  esicNumber      String?
+  mobileNumber    String
+  SecondaryMobile String?
+  isDetele        Boolean    @default(false)
+  status          UserStates @default(ACTIVE)
+  documets        String[]   @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  WorkHoursConfigurationId BigInt
+  companyId                Int
+  company                  Company  @relation(fields: [companyId], references: [id])
+  role                     Role?    @relation(fields: [roleId], references: [id])
+  roleId                   Int?
+  punchId                  Int
+  PunchLog                 PunchLog @relation(fields: [punchId], references: [id])
+
+  @@index([companyId])
+}
+
+enum workHoursModal {
+  GENERAL_TIME_COVER
+  FULL_DAY_TIME_COVER
+  SHIFT_TIME_COVER
+  DAY_WHAT_EVER_TIME_COVER
+}
+
+model BankDetails {
+  id          Int    @id @default(autoincrement())
+  purpose     String
+  bankName    String
+  bankAccount String @unique
+  ifsc        String @unique
+  companyId   Int
+
+  @@index([companyId])
+}
+
+model WorkHoursConfiguration {
+  id                        BigInt         @id @default(autoincrement())
+  workHoursModal            workHoursModal @default(GENERAL_TIME_COVER)
+  startTime                 String         @default("10:00")
+  endTime                   String         @default("17:00")
+  workingDurationMinutesMin Int            @default(60)
+  workingDurationMintesMax  Int            @default(480)
+  shiftTimes                String[]       @default([])
+  weeklyOffDays             Int[]          @default([6, 7])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+}
+
+model ParticularDateConfig {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  reason      String
+  description String
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+}
+
+enum PunchLogType {
+  IN
+  OUT
+  JUSTIFY
+  PERMISION
+  LEAVE
+  LOGFIX
+}
+
+model PunchLog {
+  id        Int          @id @default(autoincrement())
+  userId    BigInt
+  punchIn   DateTime?
+  punchOut  DateTime?
+  remarks   PunchLogType
+  updatedBy Int
+  companyId Int
+  company   Company      @relation(fields: [companyId], references: [id])
+  users     User[]
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+model SalaryDesign {
+  id         Int @id @default(autoincrement())
+  // employeeId Int
+
+  components Json? // Example: { "basic": 120, "hra": 80, "pf": 10, "vt": 10 }
+  formulas   Json? // Example: { "total": "basic+hra", "totalDeduction": "pf+vt" }
+
+  gross_vite_Amount    Float
+  total_vite_Deduction Float
+  net_vite_Pay         Float
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // @@index([employeeId])
+  @@index([companyId])
+}
+
+model attendanceDesignModal {
+  id Int @id @default(autoincrement())
+
+  // totalWorkingday
+  // totalPresntda
+  // totalHoursWorked  
+  // 
 }
