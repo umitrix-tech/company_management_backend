@@ -4,6 +4,7 @@ const prisma = require("./prisma");
 const port = process.env.PORT || 8081;
 const socketPort = 8082;
 require('dotenv').config();
+require("./src/utils/clear.cron");
 
 prisma
   .$connect()

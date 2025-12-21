@@ -37,7 +37,7 @@ model CompanyConfig {
 }
 
 model PlanHistory {
-  id         BigInt   @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   isActive   Boolean  @default(false)
   version    Decimal  @default(1.0)
   tierOfPlan PlanType
@@ -89,7 +89,7 @@ model Role {
 }
 
 model User {
-  id              BigInt     @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   name            String
   empCode         String     @unique
   adharNumber     String?    @unique
@@ -100,7 +100,7 @@ model User {
   pinCode         String
   state           String
   country         String
-  email           String?
+  email           String?    @unique
   bloodGroup      String?
   ifscCode        String?
   gender          Gender
@@ -115,7 +115,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  WorkHoursConfigurationId BigInt
+  WorkHoursConfigurationId Int
   companyId                Int
   company                  Company  @relation(fields: [companyId], references: [id])
   role                     Role?    @relation(fields: [roleId], references: [id])
@@ -124,6 +124,15 @@ model User {
   PunchLog                 PunchLog @relation(fields: [punchId], references: [id])
 
   @@index([companyId])
+}
+
+model OtpStroe {
+  id         Int      @id @default(autoincrement())
+  email      String
+  otp        String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  isVerified Boolean  @default(false)
 }
 
 enum workHoursModal {
@@ -145,7 +154,7 @@ model BankDetails {
 }
 
 model WorkHoursConfiguration {
-  id                        BigInt         @id @default(autoincrement())
+  id                        Int         @id @default(autoincrement())
   workHoursModal            workHoursModal @default(GENERAL_TIME_COVER)
   startTime                 String         @default("10:00")
   endTime                   String         @default("17:00")
@@ -183,7 +192,7 @@ enum PunchLogType {
 
 model PunchLog {
   id        Int          @id @default(autoincrement())
-  userId    BigInt
+  userId    Int
   punchIn   DateTime?
   punchOut  DateTime?
   remarks   PunchLogType

@@ -5,16 +5,19 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-const registerSchema = Joi.object({
-  name: Joi.string().min(2).required(),
+const verifyOtpSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  role:Joi.string().valid("ADMIN", "USER").optional()
+  otp: Joi.string().length(6).required()
+});
+
+const otpSendSchema = Joi.object({
+  email: Joi.string().email().required(),
 });
 
 module.exports = {
   authValidator: {
     login: loginSchema,
-    register: registerSchema,
+    verifyOtp: verifyOtpSchema,
+    otpSend: otpSendSchema,
   },
 };
