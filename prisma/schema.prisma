@@ -32,12 +32,13 @@ enum PlanType {
 
 model CompanyConfig {
   id                Int     @id @default(autoincrement())
-  isCompanyWentTour Boolean
-  themeSetting      Json    @default("{}")
+  isCompanyWentTour Boolean @default(false)
+  domain            String  @unique
+  themeSetting      Json?   @default("{}")
 }
 
 model PlanHistory {
-  id         Int   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   isActive   Boolean  @default(false)
   version    Decimal  @default(1.0)
   tierOfPlan PlanType
@@ -50,20 +51,22 @@ model PlanHistory {
 }
 
 model Company {
-  id                     Int                      @id @default(autoincrement())
-  name                   String
-  address1               String
-  address2               String?
-  logoUrl                String?
-  email                  String                   @unique
-  phone                  String
-  gstinNumber            String?
-  sacNumber              String?
-  panNumber              String?
-  esicNumber             String?
-  epfNumber              String?
-  serviceTaxNumber       String?
-  websiteLink            String?
+  id               Int     @id @default(autoincrement())
+  name             String
+  address1         String
+  address2         String?
+  logoUrl          String?
+  email            String  @unique
+  phone            String  @unique
+  gstinNumber      String?
+  sacNumber        String?
+  panNumber        String?
+  esicNumber       String?
+  epfNumber        String?
+  serviceTaxNumber String?
+  websiteLink      String?
+  ownerUserId      Int
+
   documets               String[]                 @default([])
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
@@ -74,11 +77,12 @@ model Company {
   salaryDesigns          SalaryDesign[]
   roles                  Role[]
   planHistories          PlanHistory[]
+  companyGalleries       CompanyGallery[]
 }
 
 model Role {
   id         Int    @id @default(autoincrement())
-  name       String
+  name       String @default("Owner")
   privileges Json   @default("{}")
   users      User[]
 
@@ -89,24 +93,25 @@ model Role {
 }
 
 model User {
-  id              Int     @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
-  empCode         String     @unique
+  empCode         String
   adharNumber     String?    @unique
   uanNumber       String?    @unique
   bankAccount     String?
   address         String?
-  city            String
-  pinCode         String
-  state           String
-  country         String
+  city            String?
+  pinCode         String?
+  state           String?
+  country         String?
   email           String?    @unique
   bloodGroup      String?
   ifscCode        String?
-  gender          Gender
+  gender          Gender?
   epfNumber       String?
   esicNumber      String?
-  mobileNumber    String
+  mobileNumber    String?    @unique
+  password        String
   SecondaryMobile String?
   isDetele        Boolean    @default(false)
   status          UserStates @default(ACTIVE)
@@ -115,14 +120,16 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  WorkHoursConfigurationId Int
-  companyId                Int
-  company                  Company  @relation(fields: [companyId], references: [id])
-  role                     Role?    @relation(fields: [roleId], references: [id])
+  WorkHoursConfigurationId Int?
+  companyId                Int?
+  company                  Company?  @relation(fields: [companyId], references: [id])
+  role                     Role?     @relation(fields: [roleId], references: [id])
   roleId                   Int?
-  punchId                  Int
-  PunchLog                 PunchLog @relation(fields: [punchId], references: [id])
+  punchId                  Int?
+  PunchLog                 PunchLog? @relation(fields: [punchId], references: [id])
 
+  @@unique([companyId, empCode])
+  @@unique([companyId, uanNumber])
   @@index([companyId])
 }
 
@@ -133,6 +140,19 @@ model OtpStroe {
   createdAt  DateTime @default(now())
   expiresAt  DateTime
   isVerified Boolean  @default(false)
+}
+
+model CompanyGallery {
+  id         Int     @id @default(autoincrement())
+  mediaUrl   String
+  folderName String
+  companyId  Int
+  company    Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
 }
 
 enum workHoursModal {
@@ -154,7 +174,7 @@ model BankDetails {
 }
 
 model WorkHoursConfiguration {
-  id                        Int         @id @default(autoincrement())
+  id                        Int            @id @default(autoincrement())
   workHoursModal            workHoursModal @default(GENERAL_TIME_COVER)
   startTime                 String         @default("10:00")
   endTime                   String         @default("17:00")
@@ -206,11 +226,10 @@ model PunchLog {
 }
 
 model SalaryDesign {
-  id         Int @id @default(autoincrement())
-  // employeeId Int
+  id Int @id @default(autoincrement())
 
-  components Json? // Example: { "basic": 120, "hra": 80, "pf": 10, "vt": 10 }
-  formulas   Json? // Example: { "total": "basic+hra", "totalDeduction": "pf+vt" }
+  components Json?
+  formulas   Json?
 
   gross_vite_Amount    Float
   total_vite_Deduction Float

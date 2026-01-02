@@ -1,15 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const auth = require("./auth");
-
-router.get("/logCheck", (req, res) => {
-    console.log(JSON.stringify(req.query), "Logs test");
-    res.send("ok");
-});
-router.use("/auth", auth);
-
-
-
+router.use("/tenant", require("./tenant"));
+router.use("/auth", require("./auth"));
+router.use("/company", require("./company"));
+router.use("/user", require("./user"));
 
 module.exports = router;

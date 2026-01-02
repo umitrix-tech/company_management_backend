@@ -7,12 +7,14 @@ const loginSchema = Joi.object({
 
 const verifyOtpSchema = Joi.object({
   email: Joi.string().email().required(),
-  otp: Joi.string().length(6).required()
+  otp: Joi.string().length(6).required(),
 });
 
 const otpSendSchema = Joi.object({
   email: Joi.string().email().required(),
 });
+
+
 
 module.exports = {
   authValidator: {

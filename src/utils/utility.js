@@ -1,4 +1,5 @@
 const { Parser } = require("expr-eval");
+const AppError = require("./AppError");
 
 const modalFormatCheck = ({ modal = {}, extraModal = {} }) => {
   const merged = { ...modal, ...extraModal };
@@ -183,11 +184,34 @@ function capitalizeWords(str) {
 }
 
 
+/**
+ * Extracts and verifies JWT from request
+ * @param {import('express').Request} req
+ * @returns {object} decoded user payload
+ */
+
+function authUserInfo(req) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new AppError("Access denied. Token missing.", 401);
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded;
+  } catch (error) {
+    throw new AppError("Invalid or expired token.", 401);
+  }
+}
+
 module.exports = {
   capitalizeWords,
   updateFormulaFieldWithAmount,
   modalFormatCheck,
   isValidNumber,
+  authUserInfo
 };
 
-// Example usage

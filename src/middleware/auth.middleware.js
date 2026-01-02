@@ -8,19 +8,13 @@ module.exports = function (req, res, next) {
     throw new AppError("Access Denied. No token provided.", 401);
   }
 
-  try {
-    if (token === "test") {
-      next();
-      return;
-    }
+  try {    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    if (decoded?.role != "ADMIN") {
-      throw new AppError("your not a admin user.", 401);
-    }
-    req.user = decoded;
+    req["user"] = decoded;
     next();
   } catch (err) {
     throw new AppError("Invalid token.", 401);
   }
 };
+
+
