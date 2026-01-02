@@ -25,7 +25,7 @@ router.get(
 router.put(
     '/profile',
     auth,
-    validate(updateUserSchema),
+    validate(updateUserSchemaValidation),
     userProfileUpdateController
 )
 
