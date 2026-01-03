@@ -8,7 +8,7 @@ const tenantConfigService = async (req) => {
         
         const responce = await prisma.companyConfig.findFirst({
             where: {
-                domain: req.headers.host
+                domain: req.headers.hostDomain
             }
         })
         console.log(responce,'responce');
