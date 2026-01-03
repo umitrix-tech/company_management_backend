@@ -19,11 +19,17 @@ const userProfileUpdateController = catchAsync(async (req, res) => {
     res.status(200).json({ message: "userProfile updated successfully", data: responce });
 });
 
+const createUserController = catchAsync(async (req, res) => {
+    const responce = await createUserService(req.body, req.user);
+    res.status(200).json({ message: "user created successfully", data: responce });
+})
+
 
 module.exports = {
     userProfileGetController,
     userProfileUpdateController,
-    userProfileListGetController
+    userProfileListGetController,
+    createUserController
 };
 
 

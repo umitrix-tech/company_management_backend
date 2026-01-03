@@ -10,13 +10,11 @@ const userProfilesGetService = (req, user) => {
 }
 
 const userProfileListGetService = async ({ page = 0, size = 20, search = "", sortOrder = "desc" }, user) => {
-    try {
-        const skip = page * size;
+  try {
+    const skip = page * size;
 
-
-        const sortOrderSafe = sortOrder === "asc" ? "ASC" : "DESC";
-
-        const users = await prisma.$queryRaw`
+    const sortOrderSafe = sortOrder === "asc" ? "ASC" : "DESC";
+    const users = await prisma.$queryRaw`
   SELECT
     u.*,
     COUNT(*) OVER() AS total_count
@@ -26,7 +24,7 @@ const userProfileListGetService = async ({ page = 0, size = 20, search = "", sor
     u."companyId" = ${user.companyId}
     AND u."isDetele" = false
     ${search
-                ? Prisma.sql`
+        ? Prisma.sql`
             AND (
               u."name" ILIKE ${'%' + search + '%'}
               OR u."empCode" ILIKE ${'%' + search + '%'}
@@ -34,27 +32,53 @@ const userProfileListGetService = async ({ page = 0, size = 20, search = "", sor
               OR u."mobileNumber" ILIKE ${'%' + search + '%'}
             )
           `
-                : Prisma.empty
-            }
+        : Prisma.empty
+      }
   ORDER BY u."createdAt" ${Prisma.raw(sortOrderSafe)}
   OFFSET ${skip}
   LIMIT ${size};
 `;
 
 
-        console.log(users, 'user');
+    console.log(users, 'user');
 
 
-        return { data: users, page, size };
+    return { data: users, page, size };
 
-    } catch (error) {
-        console.log(error, 'er');
+  } catch (error) {
+    console.log(error, 'er');
 
-        return catchAsyncPrismaError(error);
+    return catchAsyncPrismaError(error);
+  }
+}
+
+
+const createUserService = async ({ payload, user }) => {
+
+  try {
+    const { companyId } = user;
+
+    if (!companyId) {
+      throw new AppError("you cant create employe without company", 400);
     }
+
+    const userCreate = await prisma.user.create({
+      data: {
+        ...payload,
+        companyId,
+        roleId: 2,
+      },
+    });
+
+    return userCreate;
+
+  } catch (err) {
+    return catchAsyncPrismaError(err);
+  }
+
 }
 
 module.exports = {
-    userProfilesGetService,
-    userProfileListGetService
+  userProfilesGetService,
+  userProfileListGetService
 }
