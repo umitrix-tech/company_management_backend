@@ -62,8 +62,8 @@ const companyUpdateService = async (payload, user) => {
         const company = await prisma.company.findUnique({
             where: { id: parseInt(id) },
         });
-        console.log(company,';com');
-        
+        console.log(company, ';com');
+
 
 
         if (!company) {
@@ -81,4 +81,27 @@ const companyUpdateService = async (payload, user) => {
 }
 
 
-module.exports = { createCompanyService, companyUpdateService };
+const companyDetailService = async (user) => {
+    const { companyId } = user;
+
+    if (!companyId) {
+        throw new AppError("Company id not found", 404);
+    }
+
+    const company = await prisma.company.findUnique({
+        where: { id: parseInt(companyId) },
+        omit: {
+            updatedAt: true,
+            ownerUserId: true,
+        }
+    })
+
+    if (!company) {
+        throw new AppError("Company not found", 404);
+    }
+
+    return company;
+
+}
+
+module.exports = { createCompanyService, companyUpdateService, companyDetailService };

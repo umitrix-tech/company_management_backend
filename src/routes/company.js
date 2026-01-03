@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const validate = require("../validation");
 const { createCompanySchema, updateCompanySchema } = require("../validation/company.validation");
-const { companyCreateController, companyUpdateController } = require("../controller/company.controller");
+const { companyCreateController, companyUpdateController, companyDetaillController } = require("../controller/company.controller");
 const auth = require("../middleware/auth.middleware");
 
 router.post(
@@ -10,9 +10,13 @@ router.post(
   auth,
   validate(createCompanySchema),
   companyCreateController
-  
 );
 
+router.get(
+  '/',
+  auth,
+  companyDetaillController
+);
 
 router.put(
   '/update',

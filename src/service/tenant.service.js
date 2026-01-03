@@ -4,15 +4,12 @@ const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 
 const tenantConfigService = async (req) => {
     try {
-        console.log(req.headers,'head');
-        
         const responce = await prisma.companyConfig.findFirst({
             where: {
                 domain: req.headers.hostDomain
             }
-        })
-        console.log(responce,'responce');
-        
+        });
+                
         return responce;
     } catch (error) {
         return catchAsyncPrismaError(error);

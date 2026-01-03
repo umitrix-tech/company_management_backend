@@ -126,6 +126,7 @@ const updateCompanySchema = Joi.object({
 .min(1); // 🔥 must update at least one field
 
 
+
 module.exports = {
   createCompanySchema,
   updateCompanySchema,
