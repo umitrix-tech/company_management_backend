@@ -20,8 +20,6 @@ router.get(
     userProfileGetController
 );
 
-
-
 router.put(
     '/profile',
     auth,

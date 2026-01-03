@@ -8,7 +8,7 @@ const { ROLE_OWNER } = require("../utils/constData");
 
 const loginService = async ({ email, password }) => {
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({ where: { email } });
 
   if (!user) {
     throw new AppError("Invalid email or password", 401);
@@ -27,11 +27,18 @@ const loginService = async ({ email, password }) => {
     }
   );
 
-  const role = await prisma.role.findUnique({ where: { id: user.roleId } });
+
+  console.log(user, 'user');
+
+  let roleInfo = null;
+  if (user.roleId && user.companyId) {
+    roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) } });
+
+  }
 
 
   return {
-    token, user: { id: user.id, email: user.email, name: user.name }, role
+    token, user: { id: user.id, email: user.email, name: user.name, companyId:user.companyId }, roleInfo
   };
 };
 

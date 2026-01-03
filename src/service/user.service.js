@@ -2,73 +2,54 @@ const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 const { ROLE_OWNER } = require("../utils/constData");
+const { Prisma } = require("@prisma/client");
 
 
 const userProfilesGetService = (req, user) => {
 
 }
 
-const userProfileListGetService = ({ page = 0, size = 20, search = "", sortOrder = "desc" }, user) => {
+const userProfileListGetService = async ({ page = 0, size = 20, search = "", sortOrder = "desc" }, user) => {
     try {
         const skip = page * size;
 
-        return prisma.user.findMany({
-            where: {
-                company: {
-                    id: user.companyId
-                },
-                isDetele: false,
 
-                ...(search && {
-                    OR: [
-                        {
-                            name: {
-                                contains: search,
-                                mode: "insensitive",
-                            },
-                        },
-                        {
-                            empCode: {
-                                contains: search,
-                                mode: "insensitive",
-                            },
-                        },
-                        {
-                            email: {
-                                contains: search,
-                                mode: "insensitive",
-                            },
-                        },
-                        {
-                            mobileNumber: {
-                                contains: search,
-                                mode: "insensitive",
-                            },
-                        },
-                    ],
-                }),
-                AND: {
-                    role: {
-                        name: {
-                            not: ROLE_OWNER
-                        }
-                    }
-                }
-            },
-            orderBy: {
-                createdAt: sortOrder
-            },
-            skip,
-            take: size,
-            omit: {
-                isDetele: true,
-                password: true,
-                punchId: true,
-                updatedAt: true,
-                WorkHoursConfigurationId: true
+        const sortOrderSafe = sortOrder === "asc" ? "ASC" : "DESC";
+
+        const users = await prisma.$queryRaw`
+  SELECT
+    u.*,
+    COUNT(*) OVER() AS total_count
+  FROM "User" u
+  JOIN "Role" r ON r.id = u."roleId"
+  WHERE
+    u."companyId" = ${user.companyId}
+    AND u."isDetele" = false
+    ${search
+                ? Prisma.sql`
+            AND (
+              u."name" ILIKE ${'%' + search + '%'}
+              OR u."empCode" ILIKE ${'%' + search + '%'}
+              OR u."email" ILIKE ${'%' + search + '%'}
+              OR u."mobileNumber" ILIKE ${'%' + search + '%'}
+            )
+          `
+                : Prisma.empty
             }
-        })
+  ORDER BY u."createdAt" ${Prisma.raw(sortOrderSafe)}
+  OFFSET ${skip}
+  LIMIT ${size};
+`;
+
+
+        console.log(users, 'user');
+
+
+        return { data: users, page, size };
+
     } catch (error) {
+        console.log(error, 'er');
+
         return catchAsyncPrismaError(error);
     }
 }

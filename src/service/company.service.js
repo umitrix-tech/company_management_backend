@@ -6,8 +6,6 @@ const { ROLE_OWNER } = require("../utils/constData");
 const createCompanyService = async (payload, user) => {
     try {
 
-        console.log(user,'user');
-        
         const company = await prisma.company.findUnique({
             where: {
                 email: payload.email,
@@ -22,10 +20,12 @@ const createCompanyService = async (payload, user) => {
             throw new AppError("Company already exist with above detail", 409);
         }
 
-        let responce = await prisma.company.create({ data: {
-            ownerUserId:user.id,
-            ...payload
-        } });
+        let responce = await prisma.company.create({
+            data: {
+                ownerUserId: user.id,
+                ...payload
+            }
+        });
 
 
         const role = await prisma.role.create({
@@ -47,8 +47,8 @@ const createCompanyService = async (payload, user) => {
 
         return responce;
     } catch (err) {
-        console.log(err,'err');
-        
+        console.log(err, 'err');
+
         throw catchAsyncPrismaError(err);
     }
 };
@@ -60,8 +60,10 @@ const companyUpdateService = async (payload, user) => {
         const { id } = payload;
 
         const company = await prisma.company.findUnique({
-            where: { id },
+            where: { id: parseInt(id) },
         });
+        console.log(company,';com');
+        
 
 
         if (!company) {
