@@ -18,6 +18,10 @@ const createRoleSchema = Joi.object({
  * UPDATE ROLE
  */
 const updateRoleSchema = Joi.object({
+       id: Joi.number()
+        .integer()
+        .positive()
+        .required(),
     name: Joi.string()
         .trim()
         .min(2)

@@ -1,7 +1,8 @@
+const bcrypt = require("bcryptjs");
 const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
-const { ROLE_OWNER } = require("../utils/constData");
+const { ROLE_OWNER, TEMP_PASSWORD } = require("../utils/constData");
 const { Prisma } = require("@prisma/client");
 
 
@@ -9,20 +10,23 @@ const userProfilesGetService = (req, user) => {
 
 }
 
-const userProfileListGetService = async ({ page = 0, size = 20, search = "", sortOrder = "desc" }, user) => {
+const userProfileListGetService = async (payload, user) => {
   try {
+    const { page = 0, size = 20, search = "", sortOrder = "desc" } = payload;
+
     const skip = page * size;
 
     const sortOrderSafe = sortOrder === "asc" ? "ASC" : "DESC";
     const users = await prisma.$queryRaw`
   SELECT
-    u.*,
-    COUNT(*) OVER() AS total_count
+    u.*, r."name" AS "roleName",
+   COUNT(*) OVER()::INT AS total_count
   FROM "User" u
   JOIN "Role" r ON r.id = u."roleId"
   WHERE
     u."companyId" = ${user.companyId}
     AND u."isDetele" = false
+    AND r."name" != ${ROLE_OWNER}
     ${search
         ? Prisma.sql`
             AND (
@@ -39,46 +43,91 @@ const userProfileListGetService = async ({ page = 0, size = 20, search = "", sor
   LIMIT ${size};
 `;
 
+    const totalCount = users.length > 0 ? users[0].total_count : 0;
 
-    console.log(users, 'user');
-
-
-    return { data: users, page, size };
+    return { data: users, page, size, totalCount };
 
   } catch (error) {
-    console.log(error, 'er');
-
-    return catchAsyncPrismaError(error);
+    throw catchAsyncPrismaError(error);
   }
 }
 
 
-const createUserService = async ({ payload, user }) => {
+const createUserService = async (payload, user) => {
 
   try {
-    const { companyId } = user;
+    const { companyId = "" } = user;
 
     if (!companyId) {
       throw new AppError("you cant create employe without company", 400);
     }
 
+    const password = await bcrypt.hash(TEMP_PASSWORD, 10);
+
+
     const userCreate = await prisma.user.create({
       data: {
         ...payload,
         companyId,
-        roleId: 2,
+        password,
       },
     });
 
-    return userCreate;
+    return { ...userCreate, password: TEMP_PASSWORD };
 
   } catch (err) {
-    return catchAsyncPrismaError(err);
+
+    throw catchAsyncPrismaError(err);
   }
 
 }
 
+
+const userProfileUpdateService = async (payload, user) => {
+
+  try {
+    const { id } = payload;
+    const { companyId = "" } = user;
+
+    if (!id) {
+      throw new AppError("user id is required", 400);
+    }
+
+
+
+    if (!companyId) {
+      throw new AppError("you cant create employe without company", 400);
+    }
+
+    let checkHisCompanyUser = await prisma.user.findFirst({
+      where: {
+        id,
+        companyId,
+      },
+    });
+
+    if (!checkHisCompanyUser) {
+      throw new AppError("you cant update this user", 400);
+    };
+
+    const userUpdate = await prisma.user.update({
+      where: { id },
+      data: {
+        ...payload,
+      },
+    })
+
+    return userUpdate;
+
+  } catch (err) {
+
+    throw catchAsyncPrismaError(err);
+  }
+}
+
 module.exports = {
   userProfilesGetService,
-  userProfileListGetService
+  userProfileListGetService,
+  createUserService,
+  userProfileUpdateService
 }

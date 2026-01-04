@@ -18,8 +18,8 @@ const extractFieldFromConstraint = (error) => {
 };
 
 const catchAsyncPrismaError = (error, option = {}) => {
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    console.log(error, 'prisma error');
 
     switch (error.code) {
 
@@ -67,11 +67,13 @@ const catchAsyncPrismaError = (error, option = {}) => {
     }
   }
 
+
   if (error instanceof Prisma.PrismaClientValidationError) {
-    return new AppError(
-      'Invalid data provided',
-      400
-    );
+    const match =  error.message.match(/Argument `[^`]+` is missing\./);
+
+    // if (switch)      
+    // }
+    return new AppError(match?.[0] || "Invalid request data. Please check required fields.", 400);
   }
 
   return error; // non-prisma error

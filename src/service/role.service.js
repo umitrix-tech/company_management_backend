@@ -18,14 +18,14 @@ const createRoleService = async (data, user) => {
 /**
  * GET ALL ROLES (company scoped)
  */
-const getRolesService = async (user) => {
+const getRolesService = async (payload, user) => {
+    const { search = "" } = payload;
     return prisma.role.findMany({
         where: {
             companyId: user.companyId,
-            AND: {
-                name: {
-                    not: ROLE_OWNER
-                }
+            name: {
+                ...(search && { contains: search, mode: "insensitive" }),
+                not: ROLE_OWNER
             }
         },
         orderBy: {
@@ -38,11 +38,6 @@ const getRolesService = async (user) => {
  * GET ROLE BY ID
  */
 const getRoleByIdService = async (id, user) => {
-    console.log({
-        id,
-        user,
-    });
-    
     const role = await prisma.role.findUnique({
         where: {
             id: parseInt(id),
@@ -60,11 +55,16 @@ const getRoleByIdService = async (id, user) => {
 /**
  * UPDATE ROLE
  */
-const updateRoleService = async (id, data, user) => {
-    await getRoleByIdService(id, user);
+const updateRoleService = async (data, user) => {
+
+    if (!data.id) {
+        throw new AppError("Role id is required", 400);
+    }
+
+    await getRoleByIdService(data.id, user);
 
     return prisma.role.update({
-        where: { id },
+        where: { id: data.id },
         data: {
             name: data.name,
             privileges: data.privileges

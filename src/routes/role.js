@@ -22,7 +22,7 @@ const auth = require('../middleware/auth.middleware');
 router.post("/create", auth, validate(createRoleSchema), createRoleController);
 router.get("/list", auth, validate(listRoleSchema), getRolesController);
 router.get("/", auth, validate(roleIdParamSchema), getRoleByIdController);
-router.put("/:id", auth, validate(updateRoleSchema), updateRoleController);
+router.put("/", auth, validate(updateRoleSchema), updateRoleController);
 router.delete("/", auth, validate(roleIdParamSchema), deleteRoleController);
 
 module.exports = router;

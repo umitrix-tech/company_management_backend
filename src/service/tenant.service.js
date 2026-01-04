@@ -12,7 +12,7 @@ const tenantConfigService = async (req) => {
                 
         return responce;
     } catch (error) {
-        return catchAsyncPrismaError(error);
+        throw catchAsyncPrismaError(error);
     }
 }
 

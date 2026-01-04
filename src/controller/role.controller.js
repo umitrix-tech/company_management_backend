@@ -21,7 +21,7 @@ const createRoleController = catchAsync(async (req, res) => {
  * GET ALL ROLES
  */
 const getRolesController = catchAsync(async (req, res) => {
-    const roles = await getRolesService(req.user);
+    const roles = await getRolesService(req.query, req.user);
     res.status(200).json({
         message: "role retrived successfully",
         data: roles
@@ -49,7 +49,6 @@ const getRoleByIdController = catchAsync(async (req, res) => {
  */
 const updateRoleController = catchAsync(async (req, res) => {
     const role = await updateRoleService(
-        parseInt(req.query.id),
         req.body,
         req.user
     );

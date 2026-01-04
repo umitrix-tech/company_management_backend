@@ -7,7 +7,7 @@ const { updateUserSchemaValidation, userProfileListValidation, createUserSchemaV
 
 
 router.get(
-    '/',
+    '/list',
     auth,
     validate(userProfileListValidation),
     userProfileListGetController
@@ -21,7 +21,7 @@ router.get(
 );
 
 router.put(
-    '/profile',
+    '/',
     auth,
     validate(updateUserSchemaValidation),
     userProfileUpdateController

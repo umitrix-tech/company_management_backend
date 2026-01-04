@@ -23,12 +23,10 @@ const loginService = async ({ email, password }) => {
     { id: user.id, email: user.email, role: user.role, companyId: user.companyId },
     process.env.JWT_SECRET,
     {
-      expiresIn: "1h",
+      expiresIn: "1d",
     }
   );
 
-
-  console.log(user, 'user');
 
   let roleInfo = null;
   if (user.roleId && user.companyId) {

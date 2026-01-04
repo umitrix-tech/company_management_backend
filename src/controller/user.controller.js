@@ -1,6 +1,6 @@
 
 
-const { userProfilesGetService, userProfileListGetService } = require("../service/user.service");
+const { userProfilesGetService, userProfileListGetService, createUserService, userProfileUpdateService } = require("../service/user.service");
 const catchAsync = require("../utils/catchAsync");
 
 const userProfileGetController = catchAsync(async (req, res) => {

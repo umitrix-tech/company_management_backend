@@ -1,6 +1,7 @@
 const Joi = require("joi");
 
 const updateUserSchemaValidation = Joi.object({
+    id:Joi.number().required().positive(),
     name: Joi.string().trim().min(2).max(100),
     empCode: Joi.string().trim().max(50),
     adharNumber: Joi.string()
