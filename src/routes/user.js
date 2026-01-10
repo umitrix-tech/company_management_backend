@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const validate = require("../validation");
 const auth = require("../middleware/auth.middleware");
-const { userProfileGetController, userProfileUpdateController, userProfileListGetController, createUserController } = require("../controller/user.controller");
-const { updateUserSchemaValidation, userProfileListValidation, createUserSchemaValidation } = require("../validation/user.validation");
+const { userProfileGetController, userProfileUpdateController, userProfileListGetController, createUserController, userProfileDeleteController } = require("../controller/user.controller");
+const { updateUserSchemaValidation, userProfileListValidation, createUserSchemaValidation, userProfileDeleteValidation } = require("../validation/user.validation");
 
 
 router.get(
@@ -27,10 +27,12 @@ router.put(
     userProfileUpdateController
 )
 
-router.post("/create", 
-    auth,validate(createUserSchemaValidation),
+router.post("/create",
+    auth, validate(createUserSchemaValidation),
     createUserController
 )
+
+router.delete('/', auth, validate(userProfileDeleteValidation), userProfileDeleteController)
 
 module.exports = router;
 

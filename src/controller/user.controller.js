@@ -1,6 +1,6 @@
 
 
-const { userProfilesGetService, userProfileListGetService, createUserService, userProfileUpdateService } = require("../service/user.service");
+const { userProfilesGetService, userProfileListGetService, createUserService, userProfileUpdateService, userProfileDeleteService } = require("../service/user.service");
 const catchAsync = require("../utils/catchAsync");
 
 const userProfileGetController = catchAsync(async (req, res) => {
@@ -25,11 +25,18 @@ const createUserController = catchAsync(async (req, res) => {
 })
 
 
+const userProfileDeleteController = catchAsync(async (req, res) => {
+    const responce = await userProfileDeleteService(req.query, req.user);
+    res.status(200).json({ message: "userProfile deleted successfully", data: responce });
+})
+
+
 module.exports = {
     userProfileGetController,
     userProfileUpdateController,
     userProfileListGetController,
-    createUserController
+    createUserController,
+    userProfileDeleteController
 };
 
 

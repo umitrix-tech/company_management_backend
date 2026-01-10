@@ -82,6 +82,49 @@ const createUserService = async (payload, user) => {
 
 }
 
+const userProfileDeleteService = async (payload, user) => {
+  try {
+
+    const { id } = payload;
+    const { companyId = "" } = user;
+
+    if (!id) {
+      throw new AppError("user id is required", 400);
+    }
+
+
+
+    if (!companyId) {
+      throw new AppError("you cant create employe without company", 400);
+    }
+
+    let checkHisCompanyUser = await prisma.user.findFirst({
+      where: {
+        id: parseInt(id),
+        companyId: parseInt(companyId),
+      },
+    });
+
+    if (!checkHisCompanyUser) {
+      throw new AppError("you cant update this user", 400);
+    };
+
+    const userUpdate = await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        isDetele: true
+      },
+    })
+    return userUpdate;
+
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+
+  }
+}
+
 
 const userProfileUpdateService = async (payload, user) => {
 
@@ -129,5 +172,6 @@ module.exports = {
   userProfilesGetService,
   userProfileListGetService,
   createUserService,
-  userProfileUpdateService
+  userProfileUpdateService,
+  userProfileDeleteService
 }

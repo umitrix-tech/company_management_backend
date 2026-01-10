@@ -39,7 +39,7 @@ model CompanyConfig {
 
 model PlanHistory {
   id         Int      @id @default(autoincrement())
-  isActive   Boolean  @default(false)
+  isActive   Boolean  @default(true)
   version    Decimal  @default(1.0)
   tierOfPlan PlanType
   startDate  DateTime @default(now())
@@ -78,6 +78,29 @@ model Company {
   roles                  Role[]
   planHistories          PlanHistory[]
   companyGalleries       CompanyGallery[]
+  rolePermissions        RolePermission[]
+}
+
+model RolePermission {
+  id Int @id @default(autoincrement())
+
+  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+
+  key   String
+  label String
+
+  parentId Int?
+  parent   RolePermission?  @relation("PermissionTree", fields: [parentId], references: [id])
+  children RolePermission[] @relation("PermissionTree")
+
+  access Boolean @default(false)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@unique([roleId, key, parentId])
+  @@index([companyId])
 }
 
 model Role {
@@ -86,8 +109,9 @@ model Role {
   privileges Json   @default("{}")
   users      User[]
 
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId      Int
+  company        Company          @relation(fields: [companyId], references: [id])
+  RolePermission RolePermission[]
 
   @@index([companyId])
 }

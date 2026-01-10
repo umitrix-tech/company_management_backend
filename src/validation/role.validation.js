@@ -3,22 +3,38 @@ const Joi = require("joi");
 /**
  * CREATE ROLE
  */
+
+const rolePermissionSchema = Joi.array().items(
+    Joi.object({
+        key: Joi.string().required(),
+        label: Joi.string().required(),
+        access: Joi.boolean().default(false),
+        children: Joi.array().items(
+            Joi.object({
+                key: Joi.string().required(),
+                label: Joi.string().required(),
+                access: Joi.boolean().default(false),
+            })
+        ).default([]) // optional, empty array if no children
+    })
+).required();
+
+
 const createRoleSchema = Joi.object({
     name: Joi.string()
         .trim()
         .min(2)
         .max(50)
         .required(),
+    rolePermission: rolePermissionSchema
 
-    // accepts ANY valid JSON (object, array, nested, etc.)
-    privileges: Joi.any().required()
 });
 
 /**
  * UPDATE ROLE
  */
 const updateRoleSchema = Joi.object({
-       id: Joi.number()
+    id: Joi.number()
         .integer()
         .positive()
         .required(),
@@ -27,8 +43,8 @@ const updateRoleSchema = Joi.object({
         .min(2)
         .max(50)
         .optional(),
+    rolePermission: rolePermissionSchema
 
-    privileges: Joi.any().required()
 }).min(1);
 
 const listRoleSchema = Joi.object({

@@ -5,6 +5,7 @@ const { createRoleService,
     updateRoleService
 } = require("../service/role.service.js");
 const catchAsync = require("../utils/catchAsync.js");
+const { screenRoleInfo } = require("../utils/constData.js");
 
 /**
  * CREATE ROLE
@@ -16,6 +17,13 @@ const createRoleController = catchAsync(async (req, res) => {
         data: role
     });
 });
+
+const screenRoleController = catchAsync(async (req, res) => {
+    res.status(200).json({
+        message: "role retrived successfully",
+        data: screenRoleInfo
+    });
+})
 
 /**
  * GET ALL ROLES
@@ -80,5 +88,6 @@ module.exports = {
     getRolesController,
     getRoleByIdController,
     updateRoleController,
-    deleteRoleController
+    deleteRoleController,
+    screenRoleController
 }

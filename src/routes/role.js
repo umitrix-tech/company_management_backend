@@ -5,7 +5,8 @@ const {
     updateRoleController,
     deleteRoleController,
     getRolesController,
-    getRoleByIdController
+    getRoleByIdController,
+    screenRoleController
 } = require("../controller/role.controller");
 
 const validate = require("../validation");
@@ -19,6 +20,7 @@ const {
 
 const auth = require('../middleware/auth.middleware');
 
+router.get('/screen', auth, screenRoleController)
 router.post("/create", auth, validate(createRoleSchema), createRoleController);
 router.get("/list", auth, validate(listRoleSchema), getRolesController);
 router.get("/", auth, validate(roleIdParamSchema), getRoleByIdController);

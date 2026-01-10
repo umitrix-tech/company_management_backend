@@ -20,7 +20,7 @@ const loginService = async ({ email, password }) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, companyId: user.companyId },
+    { id: user.id, email: user.email, role: user.role, roleId:user.roleId, companyId: user.companyId },
     process.env.JWT_SECRET,
     {
       expiresIn: "1d",
@@ -31,12 +31,13 @@ const loginService = async ({ email, password }) => {
   let roleInfo = null;
   if (user.roleId && user.companyId) {
     roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) } });
-
   }
-
+  
+  const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
 
   return {
-    token, user: { id: user.id, email: user.email, name: user.name, companyId:user.companyId }, roleInfo
+    token, user: { id: user.id, email: user.email, name: user.name, companyId:user.companyId }, roleInfo,
+    plan
   };
 };
 

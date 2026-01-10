@@ -35,6 +35,18 @@ const createCompanyService = async (payload, user) => {
             },
         });
 
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+
+        const plan = await prisma.planHistory.create({
+            data: {
+                endDate: endDate,
+                tierOfPlan: "FREE",
+                isActive: true,
+                companyId: responce.id,
+            }
+        });
+
         await prisma.user.update({
             where: {
                 id: user.id,
@@ -45,7 +57,7 @@ const createCompanyService = async (payload, user) => {
             }
         })
 
-        return responce;
+        return {...responce, plan};
     } catch (err) {
         console.log(err, 'err');
 

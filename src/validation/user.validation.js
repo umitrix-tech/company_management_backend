@@ -104,9 +104,14 @@ const userProfileListValidation = Joi.object({
     sortOrder: Joi.string().valid("asc", "desc").default("desc"),
 })
 
+const userProfileDeleteValidation = Joi.object({
+    id: Joi.number().integer().positive().required()
+})
+
 
 module.exports = {
     updateUserSchemaValidation,
     userProfileListValidation,
-    createUserSchemaValidation
+    createUserSchemaValidation,
+    userProfileDeleteValidation
 }
