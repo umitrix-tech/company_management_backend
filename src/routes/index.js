@@ -6,4 +6,5 @@ router.use("/auth", require("./auth"));
 router.use("/company", require("./company"));
 router.use("/user", require("./user"));
 router.use('/role', require('./role'));
+router.use('/config', require('./configuration'));
 module.exports = router;

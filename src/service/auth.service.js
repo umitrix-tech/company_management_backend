@@ -30,7 +30,7 @@ const loginService = async ({ email, password }) => {
 
   let roleInfo = null;
   if (user.roleId && user.companyId) {
-    roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) } });
+    roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) },  include:{RolePermission:true} });
   }
   
   const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });

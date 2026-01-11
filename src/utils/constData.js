@@ -35,44 +35,44 @@ const screenList = [
     {
         "key": moduleObj.DASHBOARD.MODULE,
         "label": "Dashboard",
-        "canView": false,
+        "access": false,
         "children": [
             {
                 "key": moduleObj.DASHBOARD.VIEW,
                 "label": "View Dashboard",
-                "canView": false
+                "access": false
             },
             {
                 "key": moduleObj.DASHBOARD.CHARTS,
                 "label": "View Charts",
-                "canView": false
+                "access": false
             },
             {
                 "key": moduleObj.DASHBOARD.WIDGETS,
                 "label": "View Widgets",
-                "canView": false
+                "access": false
             }
         ]
     },
     {
         "key": moduleObj.EMPLOYEE.MODULE,
         "label": "Company",
-        "canView": false,
+        "access": false,
         "children": [
             {
                 "key": moduleObj.EMPLOYEE.VIEW,
                 "label": "View Company",
-                "canView": false
+                "access": false
             },
             {
                 "key": moduleObj.EMPLOYEE.UPDATE,
                 "label": "Update Company",
-                "canUpdate": false
+                "access": false
             },
             {
                 "key": moduleObj.EMPLOYEE.DELETE,
                 "label": "Delete Company",
-                "canDelete": false
+                "access": false
             }
         ]
     },
