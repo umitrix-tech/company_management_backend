@@ -7,7 +7,7 @@ const { ROLE_OWNER } = require("../utils/constData");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 
 
-const loginService = async ({ email, password }) => {
+const loginService = async ({ email, password, deviceId }) => {
 
   const user = await prisma.user.findFirst({ where: { email } });
 
@@ -21,7 +21,7 @@ const loginService = async ({ email, password }) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId },
+    { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId:deviceId },
     process.env.JWT_SECRET,
     {
       expiresIn: "1d",
@@ -102,7 +102,7 @@ const otpSendService = async ({ email }) => {
   };
 }
 
-const verifyOtpService = async ({ email, otp }) => {
+const verifyOtpService = async ({ email, otp, deviceId="" }) => {
   const otpEntry = await prisma.otpStroe.findFirst({
     where: { email },
     orderBy: { createdAt: 'desc' },
@@ -145,7 +145,7 @@ const verifyOtpService = async ({ email, otp }) => {
     });
 
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, role: ROLE_OWNER, companyId: newUser.companyId },
+      { id: newUser.id, email: newUser.email, role: ROLE_OWNER, companyId: newUser.companyId, deviceId },
       process.env.JWT_SECRET,
       {
         expiresIn: "1h",

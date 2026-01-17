@@ -2,8 +2,10 @@ const { loginService, otpSendService, verifyOtpService, infoService } = require(
 const catchAsync = require("../utils/catchAsync");
 
 const loginController = catchAsync(async (req, res) => {
-
-  const responce = await loginService(req.body);
+  const deviceId = req.headers["deviceId"] || "empty";
+  console.log(deviceId,'deviceId');
+  
+  const responce = await loginService({ ...req.body, deviceId });
   res.status(200).json({ message: "Login successful", data: responce });
 });
 
@@ -19,7 +21,8 @@ const otpSendController = catchAsync(async (req, res) => {
 
 
 const verifyOtpController = catchAsync(async (req, res) => {
-  const responce = await verifyOtpService(req.body);
+  const deviceId = req.headers["deviceId"] || "empty";
+  const responce = await verifyOtpService({ ...req.body, deviceId });
   res.status(200).json({ message: "OTP verified successfully", data: responce });
 });
 
