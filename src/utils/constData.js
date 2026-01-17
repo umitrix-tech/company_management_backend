@@ -1,5 +1,5 @@
 
-const moduleObj = {
+let moduleObj = {
     DASHBOARD: {
         MODULE: "dashboard_module",
         VIEW: "dashboard_view",
@@ -28,10 +28,16 @@ const moduleObj = {
         WORK_CONFIG_SETTINGS_UPDATE: "work_config_settings_update",
         WORK_CONFIG_SETTINGS_DELETE: "work_config_settings_delete",
     },
+    PUNCH_IN_PUNCH_OUT: {
+        MODULE: "punch_in_punch_out_module",
+        PUNCH_IN_PUNCH_OUT: "punch_in_punch_out",
+        EDIT_OTHER_PUNCH: "edit_punch_in",
+    }
 
 };
 
-const screenList = [
+
+let screenList = [
     {
         "key": moduleObj.DASHBOARD.MODULE,
         "label": "Dashboard",
@@ -156,8 +162,28 @@ const screenList = [
                 "access": false
             },
         ]
+    },
+    {
+        "key": moduleObj.PUNCH_IN_PUNCH_OUT.MODULE,
+        "label": "Punch In/Out",
+        "access": false,
+        "children": [
+            {
+                "key": moduleObj.PUNCH_IN_PUNCH_OUT.PUNCH_IN_PUNCH_OUT,
+                "label": "Default Punch In/Out",
+                "access": false
+            },
+
+            {
+                "key": moduleObj.PUNCH_IN_PUNCH_OUT.EDIT_OTHER_PUNCH,
+                "label": "Edit Other Punch In/Out",
+                "access": false
+            },
+        ]
     }
 ]
+
+
 
 
 module.exports = {
@@ -165,6 +191,7 @@ module.exports = {
     TEMP_PASSWORD: "Test@123",
 
     //Role info
+    moduleAccess: moduleObj,
     screenRoleInfo: screenList
 }
 

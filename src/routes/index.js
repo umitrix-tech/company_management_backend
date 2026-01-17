@@ -8,4 +8,5 @@ router.use("/user", require("./user"));
 router.use('/role', require('./role'));
 router.use('/config', require('./configuration'));
 router.use('/particularDateConfig', require('./particularDateConfig'));
+router.use('/punchLog', require('./punchLog.route'));
 module.exports = router;
