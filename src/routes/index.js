@@ -7,4 +7,5 @@ router.use("/company", require("./company"));
 router.use("/user", require("./user"));
 router.use('/role', require('./role'));
 router.use('/config', require('./configuration'));
+router.use('/particularDateConfig', require('./particularDateConfig'));
 module.exports = router;
