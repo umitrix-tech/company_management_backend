@@ -74,7 +74,9 @@ const catchAsyncPrismaError = (error, option = {}) => {
     // if (switch)      
     // }
     return new AppError(match?.[0] || "Invalid request data. Please check required fields.", 400);
-  }
+  }  
+
+  
 
   return error; // non-prisma error
 };

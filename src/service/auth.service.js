@@ -6,40 +6,52 @@ const { sendOTPEmail } = require("../utils/emil");
 const { ROLE_OWNER } = require("../utils/constData");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 
-
 const loginService = async ({ email, password, deviceId }) => {
+  try {
 
-  const user = await prisma.user.findFirst({ where: { email } });
 
-  if (!user) {
-    throw new AppError("Invalid email or password", 401);
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new AppError("Invalid email or password", 401);
-  }
-
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId:deviceId },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "1d",
+    if (!deviceId) {
+      throw new AppError("device Id missing", 403)
     }
-  );
+
+    const user = await prisma.user.findFirst({ where: { email } });
+
+    if (!user) {
+      throw new AppError("Invalid email or password", 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new AppError("Invalid email or password", 401);
+    }
 
 
-  let roleInfo = null;
-  if (user.roleId && user.companyId) {
-    roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId: deviceId },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+
+    let roleInfo = null;
+    if (user.roleId && user.companyId) {
+      roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
+    }
+
+    const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
+
+    return {
+      token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId }, roleInfo,
+      plan
+    };
+  } catch (error) {
+    console.log(error,'er');
+    
+    throw  catchAsyncPrismaError(error)
   }
 
-  const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
-
-  return {
-    token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId }, roleInfo,
-    plan
-  };
 };
 
 const infoService = async (req, user) => {
@@ -102,7 +114,12 @@ const otpSendService = async ({ email }) => {
   };
 }
 
-const verifyOtpService = async ({ email, otp, deviceId="" }) => {
+const verifyOtpService = async ({ email, otp, deviceId = "" }) => {
+
+  if (!deviceId) {
+    throw new AppError("device Id missing")
+  }
+
   const otpEntry = await prisma.otpStroe.findFirst({
     where: { email },
     orderBy: { createdAt: 'desc' },
