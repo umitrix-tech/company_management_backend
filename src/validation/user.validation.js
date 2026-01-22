@@ -45,7 +45,8 @@ const updateUserSchemaValidation = Joi.object({
     status: Joi.string().optional(),
     documets: Joi.array().items(Joi.string().trim()),
     roleId: Joi.number().integer().positive(),
-    // WorkHoursConfigurationId: Joi.number().integer().positive(),
+    WorkHoursConfigurationId: Joi.number().integer().positive().optional(),
+
 })
     .min(1);
 
@@ -94,7 +95,7 @@ const createUserSchemaValidation = Joi.object({
     status: Joi.string().optional(),
     documets: Joi.array().items(Joi.string().trim()),
     roleId: Joi.number().integer().positive(),
-    // WorkHoursConfigurationId: Joi.number().integer().positive(),
+    WorkHoursConfigurationId: Joi.number().integer().positive().optional(),
 })
     .min(1);
 const userProfileListValidation = Joi.object({

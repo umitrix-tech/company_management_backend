@@ -6,8 +6,24 @@ const { ROLE_OWNER, TEMP_PASSWORD } = require("../utils/constData");
 const { Prisma } = require("@prisma/client");
 
 
-const userProfilesGetService = (req, user) => {
+const userProfilesGetService = (payload, user) => {
+  const { id: targetUserId } = payload;
+  const { id, companyId } = user;
 
+  console.log(payload, user,'------');
+  
+  const responce = prisma.user.findMany({
+    where: {
+      id: parseInt(targetUserId),
+      companyId: parseInt(companyId)
+    }
+  })
+
+  if (!responce) {
+    throw new AppError("User not found", 404);
+  }
+
+  return responce;
 }
 
 const userProfileListGetService = async (payload, user) => {

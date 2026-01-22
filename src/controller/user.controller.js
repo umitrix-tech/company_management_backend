@@ -4,7 +4,7 @@ const { userProfilesGetService, userProfileListGetService, createUserService, us
 const catchAsync = require("../utils/catchAsync");
 
 const userProfileGetController = catchAsync(async (req, res) => {
-    const responce = await userProfilesGetService(req.query);
+    const responce = await userProfilesGetService(req.query, req.user);
     res.status(200).json({ message: "userProfile Data successfully", data: responce });
 });
 

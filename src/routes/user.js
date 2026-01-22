@@ -14,9 +14,9 @@ router.get(
 );
 
 router.get(
-    '/:id',
+    '/',
     auth,
-    validate(updateUserSchemaValidation),
+    validate(userProfileDeleteValidation),
     userProfileGetController
 );
 
