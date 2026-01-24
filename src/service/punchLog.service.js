@@ -251,7 +251,6 @@ const listPunchLogService = async (query, user) => {
     let { startDate, endDate } = query;
     let userId = user.id;
 
-
     const dateFilter = {};
     if (startDate) dateFilter.gte = new Date(startDate);
     if (endDate) dateFilter.lte = new Date(endDate);
@@ -261,28 +260,6 @@ const listPunchLogService = async (query, user) => {
       ...(userId && { userId: Number(userId) }),
       ...(Object.keys(dateFilter).length && { punchIn: dateFilter }),
     };
-
-    const userInfo = await prisma.user.findUnique({
-      where: {
-        id: user.id,
-        companyId: user.companyId
-      },
-    })
-
-    if (!userInfo) {
-      throw new Error("User not found", 403);
-    }
-
-    if (!userInfo.WorkHoursConfigurationId) {
-      throw new Error("Work Hours Configuration not found", 403);
-    }
-
-    const workConfig = await prisma.workHoursConfiguration.findFirst({
-      where: {
-        companyId: user.companyId,
-        id: userInfo.WorkHoursConfigurationId
-      }
-    });
 
     const [data] = await Promise.all([
       prisma.punchLog.findMany({
@@ -320,7 +297,6 @@ const listPunchLogService = async (query, user) => {
     return {
       data: groupedData,
       holidayList,
-      workConfig
     };
   } catch (error) {
     console.log(error, 'rr');

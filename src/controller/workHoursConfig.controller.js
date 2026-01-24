@@ -5,7 +5,8 @@ const {
   updateWorkHoursConfigService,
   deleteWorkHoursConfigService,
   getWorkHoursConfigService,
-  getWorkHoursConfigByIdService
+  getWorkHoursConfigByIdService,
+  getOwnWorkingHoursConfigService
 } = require("../service/workHoursConfig.service");
 
 const createWorkHoursConfigController = catchAsync(async (req, res) => {
@@ -46,9 +47,18 @@ const deleteWorkHoursConfigController = catchAsync(async (req, res) => {
   });
 });
 
+const getOwnWorkingHoursConfigController = catchAsync(async (req, res) => {
+  const config = await getOwnWorkingHoursConfigService(req.user);
+  res.status(200).json({
+    message: "Work hours configuration retrieved successfully",
+    data: config
+  });
+})
+
 module.exports = {
   createWorkHoursConfigController,
   updateWorkHoursConfigController,
+  getOwnWorkingHoursConfigController,
   deleteWorkHoursConfigController,
   getWorkHoursConfigController,
   getWorkHoursConfigByIdController

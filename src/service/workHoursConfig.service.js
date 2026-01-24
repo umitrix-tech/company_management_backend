@@ -195,10 +195,38 @@ const deleteWorkHoursConfigService = async (id, user) => {
   });
 };
 
+const getOwnWorkingHoursConfigService = async (user) => {
+  const userInfo = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+      companyId:user.companyId
+    }
+  })
+
+  if (!userInfo) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (!userInfo.WorkHoursConfigurationId) {
+    throw new AppError("Work hours configuration not found", 404);
+  }
+
+
+  const Config = await prisma.workHoursConfiguration.findFirst({
+    where: {
+      companyId: user.companyId,
+      id:parseInt(userInfo.WorkHoursConfigurationId)
+    }
+  });
+
+  return Config;
+}
+
 module.exports = {
   createWorkHoursConfigService,
   updateWorkHoursConfigService,
   deleteWorkHoursConfigService,
   getWorkHoursConfigService,
-  getWorkHoursConfigByIdService
+  getWorkHoursConfigByIdService,
+  getOwnWorkingHoursConfigService
 };

@@ -9,7 +9,8 @@ const {
   updateWorkHoursConfigController,
   deleteWorkHoursConfigController,
   getWorkHoursConfigController,
-  getWorkHoursConfigByIdController
+  getWorkHoursConfigByIdController,
+  getOwnWorkingHoursConfigController
 } = require("../controller/workHoursConfig.controller");
 
 const {
@@ -18,19 +19,13 @@ const {
   workHoursConfigIdSchema
 } = require("../validation/workHoursConfig.validation.js");
 
-// Create
 router.post("/create", auth, validate(createWorkHoursConfigSchema), createWorkHoursConfigController);
-
-// List (by company)
 router.get("/list", auth, getWorkHoursConfigController);
-
-// Get by id
 router.get("/", auth, validate(workHoursConfigIdSchema), getWorkHoursConfigByIdController);
-
-// Update
 router.put("/", auth, validate(updateWorkHoursConfigSchema), updateWorkHoursConfigController);
-
-// Delete
 router.delete("/", auth, validate(workHoursConfigIdSchema), deleteWorkHoursConfigController);
+
+
+router.get('/own-config', auth, getOwnWorkingHoursConfigController);
 
 module.exports = router;
