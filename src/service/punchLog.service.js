@@ -262,12 +262,33 @@ const listPunchLogService = async (query, user) => {
       ...(Object.keys(dateFilter).length && { punchIn: dateFilter }),
     };
 
-    const [data, total] = await Promise.all([
+    const userInfo = await prisma.user.findUnique({
+      where: {
+        id: user.id,
+        companyId: user.companyId
+      },
+    })
+
+    if (!userInfo) {
+      throw new Error("User not found", 403);
+    }
+
+    if (!userInfo.WorkHoursConfigurationId) {
+      throw new Error("Work Hours Configuration not found", 403);
+    }
+
+    const workConfig = await prisma.workHoursConfiguration.findFirst({
+      where: {
+        companyId: user.companyId,
+        id: userInfo.WorkHoursConfigurationId
+      }
+    });
+
+    const [data] = await Promise.all([
       prisma.punchLog.findMany({
         where,
         orderBy: { punchIn: "desc" },
       }),
-      prisma.punchLog.count({ where }),
     ]);
 
     // --- Group by date ---
@@ -294,9 +315,12 @@ const listPunchLogService = async (query, user) => {
       }
     })
 
+
+
     return {
       data: groupedData,
       holidayList,
+      workConfig
     };
   } catch (error) {
     console.log(error, 'rr');
