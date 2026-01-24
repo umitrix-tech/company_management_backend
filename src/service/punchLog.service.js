@@ -247,11 +247,10 @@ const punchOutService = async (user, payload) => {
 
 const listPunchLogService = async (query, user) => {
   try {
-    let { userId, startDate, endDate, page, limit } = query;
 
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
-    const skip = (page - 1) * limit;
+    let { startDate, endDate } = query;
+    let userId = user.id;
+
 
     const dateFilter = {};
     if (startDate) dateFilter.gte = new Date(startDate);
@@ -266,8 +265,6 @@ const listPunchLogService = async (query, user) => {
     const [data, total] = await Promise.all([
       prisma.punchLog.findMany({
         where,
-        skip,
-        take: limit,
         orderBy: { punchIn: "desc" },
       }),
       prisma.punchLog.count({ where }),
@@ -300,12 +297,6 @@ const listPunchLogService = async (query, user) => {
     return {
       data: groupedData,
       holidayList,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
     };
   } catch (error) {
     console.log(error, 'rr');
