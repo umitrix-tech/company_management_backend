@@ -79,6 +79,7 @@ model Company {
   planHistories          PlanHistory[]
   companyGalleries       CompanyGallery[]
   rolePermissions        RolePermission[]
+  timeLine               timeLine[]
 }
 
 model RolePermission {
@@ -276,4 +277,19 @@ model attendanceDesignModal {
   // totalPresntda
   // totalHoursWorked  
   // 
+}
+
+model timeLine {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  name        String
+  description String?
+
+  roleAccess Int[]
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("timeline")
 }

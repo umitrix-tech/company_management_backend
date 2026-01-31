@@ -19,6 +19,8 @@ const extractFieldFromConstraint = (error) => {
 
 const catchAsyncPrismaError = (error, option = {}) => {
 
+  console.log(error,'error');
+  
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
     switch (error.code) {
