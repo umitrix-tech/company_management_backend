@@ -30,6 +30,22 @@ enum PlanType {
   SOLD
 }
 
+enum ChatType {
+  INTERNAL
+  CUSTOMER
+}
+
+enum MessageSenderType {
+  USER
+  CUSTOMER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+}
+
 model CompanyConfig {
   id                Int     @id @default(autoincrement())
   isCompanyWentTour Boolean @default(false)
@@ -82,6 +98,8 @@ model Company {
   timeLine               timeLine[]
   media                  media[]
   policies               policy[]
+  Customer               Customer[]
+  chats                  Chat[]
 }
 
 model RolePermission {
@@ -149,11 +167,14 @@ model User {
 
   WorkHoursConfigurationId Int?
   companyId                Int?
-  company                  Company?  @relation(fields: [companyId], references: [id])
-  role                     Role?     @relation(fields: [roleId], references: [id])
+  company                  Company?          @relation(fields: [companyId], references: [id])
+  role                     Role?             @relation(fields: [roleId], references: [id])
   roleId                   Int?
   punchId                  Int?
-  PunchLog                 PunchLog? @relation(fields: [punchId], references: [id])
+  PunchLog                 PunchLog?         @relation(fields: [punchId], references: [id])
+  chatParticipants         ChatParticipant[]
+  messages                 Message[]
+  messageReads             MessageRead[]
 
   @@unique([companyId, empCode])
   @@unique([companyId, uanNumber])
@@ -327,4 +348,96 @@ model media {
   updatedAt DateTime @updatedAt
 
   @@index([companyId])
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  name      String
+  phone     String?
+  email     String?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@index([companyId])
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  type      ChatType
+  status    String   @default("OPEN") // OPEN | CLOSED
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@index([companyId])
+  @@index([companyId, type])
+}
+
+model ChatParticipant {
+  id        Int @id @default(autoincrement())
+  chatId    Int
+  companyId Int
+
+  userId     Int?
+  customerId Int?
+
+  // used ONLY for customer unread count
+  lastReadAt DateTime?
+
+  joinedAt DateTime @default(now())
+
+  chat     Chat      @relation(fields: [chatId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([chatId, userId])
+  @@index([chatId, customerId])
+
+  @@index([companyId])
+}
+
+model Message {
+  id        Int @id @default(autoincrement())
+  chatId    Int
+  companyId Int
+
+  senderType       MessageSenderType
+  senderUserId     Int?
+  senderCustomerId Int?
+
+  messageType MessageType @default(TEXT)
+  content     String
+  createdAt   DateTime    @default(now())
+
+  chat     Chat      @relation(fields: [chatId], references: [id])
+  user     User?     @relation(fields: [senderUserId], references: [id])
+  customer Customer? @relation(fields: [senderCustomerId], references: [id])
+
+  reads MessageRead[]
+
+  @@index([chatId])
+  @@index([companyId])
+  @@index([chatId, createdAt])
+}
+
+model MessageRead {
+  id        Int      @id @default(autoincrement())
+  messageId Int
+  userId    Int
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+  @@index([userId])
 }

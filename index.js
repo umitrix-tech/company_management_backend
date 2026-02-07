@@ -1,5 +1,5 @@
 const app = require("./app");
-// const socketApp = require("./socket.app");
+const socketApp = require("./src/socket/socketServer");
 const prisma = require("./prisma");
 const port = process.env.PORT || 8081;
 const socketPort = 8082;
@@ -14,9 +14,9 @@ prisma
       console.log(`Server is running on port ${port}`);
     });
 
-    // socketApp.listen(socketPort, "0.0.0.0", () => {
-    //   console.log(`Socket server is running on port ${socketPort}`);
-    // });
+    socketApp.listen(socketPort, "0.0.0.0", () => {
+      console.log(`Socket server is running on port ${socketPort}`);
+    });
   })
   .catch((error) => {
     console.error(error);
