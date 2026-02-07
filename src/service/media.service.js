@@ -55,6 +55,70 @@ const uploadMediaService = async (file, body, payload) => {
   });
 };
 
+
+const uploadMultiMediaService = async (files, user, payload) => {
+  if (!files || files.length === 0) {
+    throw new AppError("No files uploaded", 400);
+  }
+
+  console.log(files.length,'file', payload.title,"tile");
+
+  if (payload?.title && payload.title.length !== files.length) {
+    throw new AppError("Title doesn't match file count", 400);
+  }
+
+  console.log("na vara");
+  
+  
+
+  const publicBase = process.env.R2_BASE_DEV || "";
+  const mediaData = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const key = `media/${Date.now()}-${i}-${file.originalname}`;
+
+    // 1️⃣ Upload to R2
+    try {
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: BUCKET,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        })
+      );
+    } catch (err) {
+      throw new AppError("Cloudflare R2 upload failed", 500);
+    }
+
+    // 2️⃣ Prepare DB record
+    mediaData.push({
+      companyId: user.companyId,
+      fileName: payload?.title?.[i] || file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+      r2Key: key,
+      url: publicBase + key,
+      type: getMediaTypeFromMime(file.mimetype),
+    });
+  }
+
+  // 3️⃣ Single DB hit ✅
+  await prisma.media.createMany({
+    data: mediaData,
+  });
+
+
+  return await prisma.media.findMany({
+    where:{
+      r2Key: { in: mediaData.map((media) => media.r2Key)}
+    }
+  }); // or fetch created rows if needed
+};
+
+
+
 /**
  * GET MEDIA BY ID
  */
@@ -139,4 +203,5 @@ module.exports = {
   getMediaService,
   deleteMediaService,
   getMediaListService,
+  uploadMultiMediaService
 }

@@ -5,6 +5,7 @@ const {
   getMediaListService,
   deleteMediaService,
   updateMediaService,
+  uploadMultiMediaService,
 } = require("../service/media.service");
 
 /**
@@ -18,7 +19,20 @@ exports.uploadMedia = catchAsync(async (req, res) => {
   });
 });
 
+
+exports.uploadMultiMedia = catchAsync(async (req, res) => {
+  const media = await uploadMultiMediaService(req.files, req.user, req.body);
+
+  res.status(201).json({
+    status: "success",
+    results: media.length,
+    data: media,
+  });
+});
+
+
 /**
+ * 
  * GET BY ID
  */
 exports.getMedia = catchAsync(async (req, res) => {
