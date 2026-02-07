@@ -38,7 +38,7 @@ exports.uploadMultiMedia = catchAsync(async (req, res) => {
 exports.getMedia = catchAsync(async (req, res) => {
   const media = await getMediaService(req.params.id);
 
-  res.json({
+  res.status(200).json({
     status: "success",
     data: media,
   });
@@ -50,7 +50,7 @@ exports.getMedia = catchAsync(async (req, res) => {
 exports.getMediaList = catchAsync(async (req, res) => {
   const result = await getMediaListService(req.query);
 
-  res.json({
+  res.status(200).json({
     status: "success",
     ...result,
   });
@@ -66,7 +66,7 @@ exports.updateMedia = catchAsync(async (req, res) => {
     req.user
   );
 
-  res.json({
+  res.status(200).json({
     status: "success",
     data: media,
   });
