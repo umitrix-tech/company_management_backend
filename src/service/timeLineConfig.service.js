@@ -1,6 +1,7 @@
 const prisma = require("../../prisma");
 const AppError = require("../utils/AppError");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
+const { ROLE_OWNER } = require("../utils/constData");
 
 /**
  * CREATE
@@ -125,7 +126,7 @@ const listTimeLineService = async (query, user) => {
     const where = {
       companyId: user.companyId,
 
-      ...(user.roleId && {
+      ...(user.roleId && user.role != ROLE_OWNER && {
         roleAccess: {
           has: user.roleId,
         },

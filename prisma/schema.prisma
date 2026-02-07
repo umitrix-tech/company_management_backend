@@ -80,6 +80,7 @@ model Company {
   companyGalleries       CompanyGallery[]
   rolePermissions        RolePermission[]
   timeLine               timeLine[]
+  media                  media[]
 }
 
 model RolePermission {
@@ -292,4 +293,29 @@ model timeLine {
 
   @@index([companyId])
   @@map("timeline")
+}
+
+model policy {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  roleAccess  Int[]
+  mediaId     Int[]
+}
+
+model media {
+  id        Int     @id @default(autoincrement())
+  fileName  String
+  mimeType  String?
+  size      Int
+  url       String
+  r2Key     String
+  type      String
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
 }

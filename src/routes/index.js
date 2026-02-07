@@ -9,5 +9,9 @@ router.use('/role', require('./role'));
 router.use('/config', require('./configuration'));
 router.use('/particularDateConfig', require('./particularDateConfig'));
 router.use('/punchLog', require('./punchLog.route'));
-router.use('/timeline',require('./timeLineConfig'))
+router.use('/timeline',require('./timeLineConfig'));
+// router.use('/policies',require('./policies'));
+
+router.use("/media", require("./media"));
+
 module.exports = router;
