@@ -10,8 +10,7 @@ router.use('/config', require('./configuration'));
 router.use('/particularDateConfig', require('./particularDateConfig'));
 router.use('/punchLog', require('./punchLog.route'));
 router.use('/timeline',require('./timeLineConfig'));
-// router.use('/policies',require('./policies'));
-
+router.use('/policy',require('./policy'));
 router.use("/media", require("./media"));
 
 module.exports = router;

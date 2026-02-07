@@ -1,34 +1,57 @@
-// validations/policy.validation.js
 const Joi = require("joi");
 
 /**
- * Create Policy
+ * CREATE
  */
 const createPolicySchema = Joi.object({
-  name: Joi.string().min(3).required(),
-  description: Joi.string().min(5).required(),
-  roleAccess: Joi.array().items(Joi.number().integer()).required(),
-  mediaUrls: Joi.array().items(Joi.string().uri()).optional()
+  name: Joi.string().trim().min(2).required(),
+  description: Joi.string().trim().allow("").optional(),
+  roleAccess: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .required(),
+  mediaId: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .required(),
 });
 
 /**
- * Update Policy
+ * UPDATE
  */
 const updatePolicySchema = Joi.object({
-  name: Joi.string().min(3).optional(),
-  description: Joi.string().min(5).optional(),
-  roleAccess: Joi.array().items(Joi.number().integer()).optional()
+  id: Joi.number().integer().positive().required(),
+  name: Joi.string().trim().min(2).optional(),
+  description: Joi.string().trim().allow("").optional(),
+  roleAccess: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .optional(),
+  mediaId: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .optional(),
+}).min(1); // at least one field required
+
+/**
+ * PARAM :id
+ */
+const idParamSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
 });
 
 /**
- * Policy ID param validation
+ * LIST (query params)
  */
-const policyIdParam = Joi.object({
-  id: Joi.number().integer().required()
+const listPolicySchema = Joi.object({
+  search: Joi.string().trim().allow(""),
+  page: Joi.number().integer().min(1).default(1),
+  size: Joi.number().integer().min(1).max(100).default(10),
 });
 
 module.exports = {
   createPolicySchema,
   updatePolicySchema,
-  policyIdParam
+  idParamSchema,
+  listPolicySchema,
 };

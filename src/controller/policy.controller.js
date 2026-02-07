@@ -1,58 +1,41 @@
-// controllers/policy.controller.js
-const policyService = require("../service/policy.service");
+const catchAsync = require("../utils/catchAsync");
+const {
+    createPolicyService,
+    updatePolicyService,
+    deletePolicyService,
+    getPolicyService,
+    listPolicyService,
+} = require("../service/policy.service");
 
-const createPolicy = async (req, res) => {
-  try {
-    const data = await policyService.createPolicy(req.body);
-    return res.status(201).json({ message: "Policy created", data });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+const createPolicyController = catchAsync(async (req, res) => {
+    const data = await createPolicyService(req.body, req.user);
+    res.status(201).json({ message: "Created successfully", data });
+});
 
-const getAllPolicies = async (req, res) => {
-  try {
-    const data = await policyService.getAllPolicies();
-    return res.json(data);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+const updatePolicyController = catchAsync(async (req, res) => {
+    const data = await updatePolicyService(req.body, req.user);
+    res.status(200).json({ message: "Updated successfully", data });
+});
 
-const getPolicyById = async (req, res) => {
-  try {
-    const data = await policyService.getPolicyById(Number(req.params.id));
-    return res.json(data);
-  } catch (error) {
-    return res.status(404).json({ message: error.message });
-  }
-};
+const deletePolicyController = catchAsync(async (req, res) => {
+    const data = await deletePolicyService(req.query.id, req.user);
+    res.status(200).json({ message: "Deleted successfully", data });
+});
 
-const updatePolicyById = async (req, res) => {
-  try {
-    const data = await policyService.updatePolicyById(
-      Number(req.params.id),
-      req.body
-    );
-    return res.json({ message: "Policy updated", data });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+const getPolicyController = catchAsync(async (req, res) => {
+    const data = await getPolicyService(req.params.id, req.user);
+    res.status(200).json({ data });
+});
 
-const deletePolicyById = async (req, res) => {
-  try {
-    await policyService.deletePolicyById(Number(req.params.id));
-    return res.json({ message: "Policy deleted successfully" });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+const listPolicyController = catchAsync(async (req, res) => {
+    const data = await listPolicyService(req.query, req.user);
+    res.status(200).json(data);
+});
 
 module.exports = {
-  createPolicy,
-  getAllPolicies,
-  getPolicyById,
-  updatePolicyById,
-  deletePolicyById
+    createPolicyController,
+    deletePolicyController,
+    getPolicyController,
+    listPolicyController,
+    updatePolicyController,
 };

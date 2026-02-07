@@ -81,6 +81,7 @@ model Company {
   rolePermissions        RolePermission[]
   timeLine               timeLine[]
   media                  media[]
+  policies               policy[]
 }
 
 model RolePermission {
@@ -301,6 +302,14 @@ model policy {
   description String
   roleAccess  Int[]
   mediaId     Int[]
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
 }
 
 model media {
