@@ -16,6 +16,7 @@ const loginService = async ({ email, password, deviceId }) => {
 
     const user = await prisma.user.findFirst({ where: { email } });
 
+
     if (!user) {
       throw new AppError("Invalid email or password", 401);
     }
@@ -24,6 +25,9 @@ const loginService = async ({ email, password, deviceId }) => {
     if (!isPasswordValid) {
       throw new AppError("Invalid email or password", 401);
     }
+
+    let companyInfo = user.companyId && await prisma.company.findFirst({ where: { id: parseInt(user.companyId) } })
+
 
 
     const token = jwt.sign(
@@ -43,13 +47,13 @@ const loginService = async ({ email, password, deviceId }) => {
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
 
     return {
-      token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId }, roleInfo,
+      token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId, companyName: companyInfo?.name || null }, roleInfo,
       plan
     };
   } catch (error) {
-    console.log(error,'er');
-    
-    throw  catchAsyncPrismaError(error)
+    console.log(error, 'er');
+
+    throw catchAsyncPrismaError(error)
   }
 
 };
