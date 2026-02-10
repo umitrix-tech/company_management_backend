@@ -23,7 +23,7 @@ const deletePolicyController = catchAsync(async (req, res) => {
 });
 
 const getPolicyController = catchAsync(async (req, res) => {
-    const data = await getPolicyService(req.params.id, req.user);
+    const data = await getPolicyService(req.query.id, req.user);
     res.status(200).json({ data });
 });
 

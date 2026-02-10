@@ -4,8 +4,6 @@ const AppError = require("../utils/AppError");
 module.exports = function (req, res, next) {
   const token = req.header("Authorization")?.split(" ")[1];
   const deviceId = req.header("deviceId");
-  console.log(deviceId,'deviceId');
-  
 
   if (!deviceId) {
     throw new AppError("Access Denied. No device id provided.", 401);

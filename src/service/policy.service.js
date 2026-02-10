@@ -87,14 +87,33 @@ const getPolicyService = async (id, user) => {
       where: {
         id: Number(id),
         companyId: user.companyId,
+        ...(user.roleId && user.role != ROLE_OWNER && {
+          roleAccess: {
+            has: user.roleId
+          }
+        })
       },
+      omit:{
+        companyId:true
+      }
     });
 
     if (!data) {
       throw new AppError("Record not found", 404);
     }
 
-    return data;
+    let mediaDetails = await prisma.media.findMany({
+      where: {
+        id: { in: data.mediaId }
+      }
+    }) || {}
+
+
+
+    return {
+      ...data,
+      mediaDetails
+    };
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }
@@ -135,6 +154,7 @@ const listPolicyService = async (query, user) => {
       }),
     };
 
+
     const [data, total] = await Promise.all([
       prisma.policy.findMany({
         where,
@@ -147,6 +167,7 @@ const listPolicyService = async (query, user) => {
       }),
       prisma.policy.count({ where }),
     ]);
+
 
     return {
       data,

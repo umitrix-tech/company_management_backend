@@ -47,7 +47,7 @@ const loginService = async ({ email, password, deviceId }) => {
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
 
     return {
-      token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId, companyName: companyInfo?.name || null }, roleInfo,
+      token, user: { id: user.id, email: user.email, name: user.name, companyId: user.companyId, companyName: companyInfo?.name || null, logoUrl: companyInfo.logoUrl || "" }, roleInfo,
       plan
     };
   } catch (error) {
@@ -67,8 +67,13 @@ const infoService = async (req, user) => {
     }
 
     let roleInfo = null;
+    let companyInfo = null;
     if (user.roleId && user.companyId) {
       roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
+      companyInfo = await prisma.company.findFirst({where:{id:parseInt(user.companyId)}, select:{
+        name:true,
+        logoUrl:true,
+      }});
     }
 
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
@@ -80,7 +85,8 @@ const infoService = async (req, user) => {
 
     return {
       user: ownuserInfo, roleInfo,
-      plan
+      plan,
+      companyInfo
     };
   } catch (error) {
     throw catchAsyncPrismaError(error)

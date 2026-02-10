@@ -3,8 +3,6 @@ const catchAsync = require("../utils/catchAsync");
 
 const loginController = catchAsync(async (req, res) => {
   const deviceId = req.header("deviceId") || "";
-  console.log(deviceId,'deviceId');
-  
   const responce = await loginService({ ...req.body, deviceId });
   res.status(200).json({ message: "Login successful", data: responce });
 });                  
