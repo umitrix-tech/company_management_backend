@@ -15,9 +15,7 @@ module.exports = function (req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     console.log(decoded,'decoded');
-    
     if (decoded.deviceId && deviceId != decoded.deviceId) {
       throw new AppError("Signature Mismatch");
     }

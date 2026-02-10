@@ -17,7 +17,6 @@ router.post(
     uploadMultiMedia
 );
 
-
 // router.get("/list", getMediaList);
 router.get("/:id", getMedia);
 // router.delete("/delete/:id", auth, deleteMedia);

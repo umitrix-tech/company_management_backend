@@ -4,6 +4,8 @@ const validate = require("../validation");
 const { createCompanySchema, updateCompanySchema } = require("../validation/company.validation");
 const { companyCreateController, companyUpdateController, companyDetaillController } = require("../controller/company.controller");
 const auth = require("../middleware/auth.middleware");
+const permissonAuth = require("../middleware/permissionMiddleware");
+const { moduleAccess } = require("../utils/constData");
 
 router.post(
   '/create',
@@ -14,13 +16,13 @@ router.post(
 
 router.get(
   '/',
-  auth,
+  permissonAuth(moduleAccess.COMPANY_INFO.MODULE),
   companyDetaillController
 );
 
 router.put(
   '/update',
-  auth,
+  permissonAuth(moduleAccess.COMPANY_INFO.EDIT_COMPANY),
   validate(updateCompanySchema),
   companyUpdateController
 )

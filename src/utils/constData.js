@@ -32,6 +32,10 @@ let moduleObj = {
         MODULE: "punch_in_punch_out_module",
         PUNCH_IN_PUNCH_OUT: "punch_in_punch_out",
         EDIT_OTHER_PUNCH: "edit_punch_in",
+    },
+    COMPANY_INFO: {
+        MODULE: "company_info",
+        EDIT_COMPANY: "company_info_edit",
     }
 
 };
@@ -180,7 +184,22 @@ let screenList = [
                 "access": false
             },
         ]
-    }
+    },
+
+    {
+        "key": moduleObj.COMPANY_INFO.MODULE,
+        "label": "Company Info",
+        "access": false,
+        "children": [
+            {
+                "key": moduleObj.COMPANY_INFO.EDIT_COMPANY,
+                "label": "Edit Company Details",
+                "access": false
+            },
+
+        ]
+    },
+
 ]
 
 

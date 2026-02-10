@@ -29,9 +29,15 @@ const loginService = async ({ email, password, deviceId }) => {
     let companyInfo = user.companyId && await prisma.company.findFirst({ where: { id: parseInt(user.companyId) } })
 
 
+    let roleInfo = null;
+    if (user.roleId && user.companyId) {
+      roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
+      console.log(roleInfo, 'roleInfo');
+
+    }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId: deviceId },
+      { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId: deviceId, role: roleInfo?.name || "" },
       process.env.JWT_SECRET,
       {
         expiresIn: "1d",
@@ -39,10 +45,7 @@ const loginService = async ({ email, password, deviceId }) => {
     );
 
 
-    let roleInfo = null;
-    if (user.roleId && user.companyId) {
-      roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
-    }
+
 
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
 
@@ -70,10 +73,12 @@ const infoService = async (req, user) => {
     let companyInfo = null;
     if (user.roleId && user.companyId) {
       roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
-      companyInfo = await prisma.company.findFirst({where:{id:parseInt(user.companyId)}, select:{
-        name:true,
-        logoUrl:true,
-      }});
+      companyInfo = await prisma.company.findFirst({
+        where: { id: parseInt(user.companyId) }, select: {
+          name: true,
+          logoUrl: true,
+        }
+      });
     }
 
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
@@ -196,9 +201,42 @@ const verifyOtpService = async ({ email, otp, deviceId = "" }) => {
   }
 }
 
+
+
+const rolePermissonCheck = async (user, accessKey = "") => {
+
+  if (!user.roleId || !accessKey) {
+    throw new AppError("Config is missing", 400);
+  }
+  try {
+    const responce = await prisma.rolePermission.findFirst({
+      where: {
+        roleId: user.roleId,
+        companyId: user.companyId,
+        key: accessKey
+      }
+    })
+
+
+    if (!responce) {
+      throw new AppError("Access Retricted For this Role", 400)
+    }
+
+    if (!responce.access) {
+      throw new AppError("Access Retricted For this Role", 400)
+    }
+
+    return responce;
+
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+}
+
 module.exports = {
   loginService,
   otpSendService,
   verifyOtpService,
-  infoService
+  infoService,
+  rolePermissonCheck
 }
