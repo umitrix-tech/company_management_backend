@@ -36,7 +36,21 @@ let moduleObj = {
     COMPANY_INFO: {
         MODULE: "company_info",
         EDIT_COMPANY: "company_info_edit",
-    }
+    },
+    NOTES: {
+        MODULE: "notes_module",
+        VIEW: "notes_view",
+        CREATE: "notes_create",
+        UPDATE: "notes_update",
+        DELETE: "notes_delete"
+    },
+    GALLERY: {
+        MODULE: "gallery_module",
+        VIEW: "gallery_view",
+        CREATE: "gallery_create",
+        UPDATE: "gallery_update",
+        DELETE: "gallery_delete"
+    },
 
 };
 
@@ -197,6 +211,60 @@ let screenList = [
                 "access": false
             },
 
+        ]
+    },
+    {
+        "key": moduleObj.NOTES.MODULE,
+        "label": "Notes",
+        "access": false,
+        "children": [
+            {
+                "key": moduleObj.NOTES.VIEW,
+                "label": "View Notes",
+                "access": false
+            },
+            {
+                "key": moduleObj.NOTES.CREATE,
+                "label": "Create Note",
+                "access": false
+            },
+            {
+                "key": moduleObj.NOTES.UPDATE,
+                "label": "Update Note",
+                "access": false
+            },
+            {
+                "key": moduleObj.NOTES.DELETE,
+                "label": "Delete Note",
+                "access": false
+            }
+        ]
+    },
+    {
+        "key": moduleObj.GALLERY.MODULE,
+        "label": "Gallery",
+        "access": false,
+        "children": [
+            {
+                "key": moduleObj.GALLERY.VIEW,
+                "label": "View Gallery",
+                "access": false
+            },
+            {
+                "key": moduleObj.GALLERY.CREATE,
+                "label": "Create Gallery Item",
+                "access": false
+            },
+            {
+                "key": moduleObj.GALLERY.UPDATE,
+                "label": "Update Gallery Item",
+                "access": false
+            },
+            {
+                "key": moduleObj.GALLERY.DELETE,
+                "label": "Delete Gallery Item",
+                "access": false
+            }
         ]
     },
 
