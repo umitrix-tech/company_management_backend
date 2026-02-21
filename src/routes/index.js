@@ -12,7 +12,6 @@ router.use('/punchLog', require('./punchLog.route'));
 router.use('/timeline',require('./timeLineConfig'));
 router.use('/policy',require('./policy'));
 router.use("/media", require("./media"));
-// Add these lines to your existing routes/index.js
 router.use('/notes', require('./notes'));
 router.use('/gallery', require('./gallery'));
 

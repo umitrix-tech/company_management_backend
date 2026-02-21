@@ -35,17 +35,14 @@ const createGalleryService = async (payload, user) => {
       data: {
         tag: payload.tag,
         mediaId: Number(payload.mediaId),
+        mediaUrl: media.url,
+        type: media.mimeType,
         companyId: user.companyId,
-      },
-      include: {
-        company: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      }
     });
   } catch (error) {
+    console.log(error, 'error');
+
     throw catchAsyncPrismaError(error);
   }
 };
@@ -83,33 +80,26 @@ const updateGalleryService = async (payload, user) => {
       }
     }
 
-    // Verify media if updating mediaId
-    if (payload.mediaId) {
-      const media = await prisma.media.findFirst({
-        where: {
-          id: Number(payload.mediaId),
-          companyId: user.companyId,
-        },
-      });
+    const media = await prisma.media.findFirst({
+      where: {
+        id: Number(payload.mediaId),
+        companyId: user.companyId,
+      },
+    });
 
-      if (!media) {
-        throw new AppError("Media not found", 404);
-      }
+    if (!media) {
+      throw new AppError("Media not found", 404);
     }
 
     return await prisma.gallery.update({
       where: { id: Number(id) },
       data: {
         tag: payload.tag,
-        mediaId: payload.mediaId ? Number(payload.mediaId) : undefined,
+        mediaId: Number(payload.mediaId),
+        mediaUrl: media.url,
+        type: media.mimeType,
       },
-      include: {
-        company: {
-          select: {
-            name: true,
-          },
-        },
-      },
+
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);
@@ -150,31 +140,14 @@ const getGalleryService = async (id, user) => {
         id: Number(id),
         companyId: user.companyId,
       },
-      include: {
-        company: {
-          select: {
-            name: true,
-          },
-        },
-      },
     });
 
     if (!data) {
       throw new AppError("Record not found", 404);
     }
 
-    // Fetch media details
-    const media = await prisma.media.findFirst({
-      where: {
-        id: data.mediaId,
-        companyId: user.companyId,
-      },
-    });
 
-    return {
-      ...data,
-      mediaDetails: media,
-    };
+    return data;
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }
@@ -210,30 +183,8 @@ const listGalleryService = async (query, user) => {
       prisma.gallery.count({ where }),
     ]);
 
-    // Fetch media details for each gallery item
-    const mediaIds = data.map(item => item.mediaId);
-    const mediaMap = {};
-    
-    if (mediaIds.length > 0) {
-      const mediaItems = await prisma.media.findMany({
-        where: {
-          id: { in: mediaIds },
-          companyId: user.companyId,
-        },
-      });
-      
-      mediaItems.forEach(media => {
-        mediaMap[media.id] = media;
-      });
-    }
-
-    const dataWithMedia = data.map(item => ({
-      ...item,
-      mediaDetails: mediaMap[item.mediaId] || null,
-    }));
-
     return {
-      data: dataWithMedia,
+      data: data,
       pagination: {
         total,
         page: Number(page),

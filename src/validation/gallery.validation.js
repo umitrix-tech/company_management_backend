@@ -13,8 +13,8 @@ const createGallerySchema = Joi.object({
  */
 const updateGallerySchema = Joi.object({
   id: Joi.number().integer().positive().required(),
-  tag: Joi.string().trim().min(2).optional(),
-  mediaId: Joi.number().integer().positive().optional(),
+  tag: Joi.string().trim().min(2).required(),
+  mediaId: Joi.number().integer().positive().required(),
 }).min(1);
 
 /**

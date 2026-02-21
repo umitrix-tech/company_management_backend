@@ -14,6 +14,10 @@ const createNotesService = async (payload, user) => {
         startDate: new Date(payload.startDate),
         companyId: user.companyId,
       },
+      omit: {
+        companyId: true
+      }
+
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);
@@ -43,8 +47,11 @@ const updateNotesService = async (payload, user) => {
       data: {
         title: payload.title,
         content: payload.content,
-        startDate: payload.startDate ? new Date(payload.startDate) : undefined,
       },
+      omit: {
+        companyId: true
+      }
+
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);
@@ -69,6 +76,9 @@ const deleteNotesService = async (id, user) => {
 
     return await prisma.notes.delete({
       where: { id: Number(id) },
+      omit: {
+        companyId: true
+      }
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);
@@ -85,6 +95,10 @@ const getNotesService = async (id, user) => {
         id: Number(id),
         companyId: user.companyId,
       },
+      omit: {
+        companyId: true
+      }
+
     });
 
     if (!data) {
@@ -134,6 +148,9 @@ const listNotesService = async (query, user) => {
         orderBy: { startDate: "desc" },
         skip: Number(skip),
         take: Number(limit),
+        omit:{
+          companyId:true
+        }
       }),
       prisma.notes.count({ where }),
     ]);

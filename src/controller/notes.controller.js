@@ -18,12 +18,12 @@ const updateNotesController = catchAsync(async (req, res) => {
 });
 
 const deleteNotesController = catchAsync(async (req, res) => {
-  await deleteNotesService(req.query.id, req.user);
-  res.status(200).json({ message: "Notes deleted successfully" });
+  const data = await deleteNotesService(req.query.id, req.user);
+  res.status(200).json({ message: "Notes deleted successfully",data });
 });
 
 const getNotesController = catchAsync(async (req, res) => {
-  const data = await getNotesService(req.params.id, req.user);
+  const data = await getNotesService(req.query.id, req.user);
   res.status(200).json({ data });
 });
 

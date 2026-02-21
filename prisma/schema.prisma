@@ -102,8 +102,6 @@ model Company {
   chats                  Chat[]
   gallery                Gallery[]
   notes                  Notes[]
-
-
 }
 
 model RolePermission {
@@ -355,7 +353,7 @@ model media {
 }
 
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   companyId Int
   name      String
   phone     String?
@@ -363,7 +361,7 @@ model Customer {
 
   createdAt DateTime @default(now())
 
-  company Company @relation(fields: [companyId], references: [id])
+  company      Company           @relation(fields: [companyId], references: [id])
   participants ChatParticipant[]
   messages     Message[]
 
@@ -405,7 +403,6 @@ model ChatParticipant {
 
   @@index([chatId, userId])
   @@index([chatId, customerId])
-
   @@index([companyId])
 }
 
@@ -447,26 +444,28 @@ model MessageRead {
 }
 
 model Notes {
-  id         Int       @id @default(autoincrement())
-  title      String
-  content    String
-  startDate  DateTime
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  companyId  Int
-  company    Company   @relation(fields: [companyId], references: [id])
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  startDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
 
   @@index([companyId])
 }
 
 model Gallery {
-  id         Int       @id @default(autoincrement())
-  tag        String    @unique
-  mediaId    Int
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  companyId  Int
-  company    Company   @relation(fields: [companyId], references: [id])
+  id        Int      @id @default(autoincrement())
+  tag       String   @unique
+  mediaId   Int
+  mediaUrl  String   @default("")
+  type      String   @default("DOC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
 
   @@index([companyId])
 }

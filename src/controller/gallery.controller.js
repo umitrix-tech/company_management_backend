@@ -18,12 +18,12 @@ const updateGalleryController = catchAsync(async (req, res) => {
 });
 
 const deleteGalleryController = catchAsync(async (req, res) => {
-  await deleteGalleryService(req.query.id, req.user);
-  res.status(200).json({ message: "Gallery item deleted successfully" });
+  const data = await deleteGalleryService(req.query.id, req.user);
+  res.status(200).json({ message: "Gallery item deleted successfully", data });
 });
 
 const getGalleryController = catchAsync(async (req, res) => {
-  const data = await getGalleryService(req.params.id, req.user);
+  const data = await getGalleryService(req.query.id, req.user);
   res.status(200).json({ data });
 });
 

@@ -45,7 +45,7 @@ router.delete(
 
 // GET BY ID
 router.get(
-  "/:id",
+  "/single",
   auth,
   validate(idParamSchema),
   getNotesController
