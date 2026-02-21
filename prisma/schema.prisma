@@ -51,6 +51,7 @@ model CompanyConfig {
   isCompanyWentTour Boolean @default(false)
   domain            String  @unique
   themeSetting      Json?   @default("{}")
+  downTime          Boolean @default(false)
 }
 
 model PlanHistory {
