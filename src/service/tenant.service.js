@@ -1,3 +1,4 @@
+
 const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
@@ -6,7 +7,7 @@ const tenantConfigService = async (req) => {
     try {
         const responce = await prisma.companyConfig.findFirst({
             where: {
-                domain: req.headers.hostDomain
+                domain: String(req.headers?.hostdomain)
             }
         });
                 
