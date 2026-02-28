@@ -51,6 +51,11 @@ let moduleObj = {
         UPDATE: "gallery_update",
         DELETE: "gallery_delete"
     },
+       SUBSCRIPTION: {
+        MODULE: "subscription_module",
+        VIEW: "subscription_view",
+        CREATE: "subscription_create"
+    },
 
 };
 
@@ -265,6 +270,23 @@ let screenList = [
                 "label": "Delete Gallery Item",
                 "access": false
             }
+        ]
+    },
+     {
+        "key": moduleObj.SUBSCRIPTION.MODULE,
+        "label": "Subscription",
+        "access": false,
+        "children": [
+            {
+                "key": moduleObj.SUBSCRIPTION.VIEW,
+                "label": "View Subscription",
+                "access": false
+            },
+               {
+                "key": moduleObj.SUBSCRIPTION.CREATE,
+                "label": "CreateSubscription",
+                "access": false
+            },
         ]
     },
 
