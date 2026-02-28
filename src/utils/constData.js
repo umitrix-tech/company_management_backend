@@ -1,4 +1,3 @@
-
 let moduleObj = {
     DASHBOARD: {
         MODULE: "dashboard_module",
@@ -51,14 +50,14 @@ let moduleObj = {
         UPDATE: "gallery_update",
         DELETE: "gallery_delete"
     },
-       SUBSCRIPTION: {
+    SUBSCRIPTION: {  // This is your PLAN/SUBSCRIPTION module
         MODULE: "subscription_module",
         VIEW: "subscription_view",
-        CREATE: "subscription_create"
+        CREATE: "subscription_create",
+        UPDATE: "subscription_update",  // Added for completeness
+        DELETE: "subscription_delete"   // Added for completeness
     },
-
 };
-
 
 let screenList = [
     {
@@ -176,12 +175,12 @@ let screenList = [
             },
             {
                 "key": moduleObj.SETTINGS.WORK_CONFIG_SETTINGS_UPDATE,
-                "label": "Work Config ",
+                "label": "Work Config Update",
                 "access": false
             },
             {
                 "key": moduleObj.SETTINGS.WORK_CONFIG_SETTINGS_DELETE,
-                "label": "Work Config Create",
+                "label": "Work Config Delete",
                 "access": false
             },
         ]
@@ -196,7 +195,6 @@ let screenList = [
                 "label": "Default Punch In/Out",
                 "access": false
             },
-
             {
                 "key": moduleObj.PUNCH_IN_PUNCH_OUT.EDIT_OTHER_PUNCH,
                 "label": "Edit Other Punch In/Out",
@@ -204,7 +202,6 @@ let screenList = [
             },
         ]
     },
-
     {
         "key": moduleObj.COMPANY_INFO.MODULE,
         "label": "Company Info",
@@ -215,7 +212,6 @@ let screenList = [
                 "label": "Edit Company Details",
                 "access": false
             },
-
         ]
     },
     {
@@ -272,7 +268,7 @@ let screenList = [
             }
         ]
     },
-     {
+    {
         "key": moduleObj.SUBSCRIPTION.MODULE,
         "label": "Subscription",
         "access": false,
@@ -282,18 +278,24 @@ let screenList = [
                 "label": "View Subscription",
                 "access": false
             },
-               {
+            {
                 "key": moduleObj.SUBSCRIPTION.CREATE,
-                "label": "CreateSubscription",
+                "label": "Create Subscription",
                 "access": false
             },
+            {
+                "key": moduleObj.SUBSCRIPTION.UPDATE,
+                "label": "Update Subscription",
+                "access": false
+            },
+            {
+                "key": moduleObj.SUBSCRIPTION.DELETE,
+                "label": "Delete Subscription",
+                "access": false
+            }
         ]
     },
-
-]
-
-
-
+];
 
 module.exports = {
     ROLE_OWNER: "Owner",
@@ -302,5 +304,4 @@ module.exports = {
     //Role info
     moduleAccess: moduleObj,
     screenRoleInfo: screenList
-}
-
+};

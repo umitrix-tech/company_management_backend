@@ -14,5 +14,6 @@ router.use('/policy',require('./policy'));
 router.use("/media", require("./media"));
 router.use('/notes', require('./notes'));
 router.use('/gallery', require('./gallery'));
+router.use('/plan-history', require('./planHistory'));
 
 module.exports = router;
