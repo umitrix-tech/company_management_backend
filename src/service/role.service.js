@@ -189,6 +189,9 @@ const updateRoleService = async (data, user) => {
                 }
             }
         });
+    }, {
+        maxWait: 10000,
+        timeout: 20000
     });
 };
 
@@ -241,6 +244,9 @@ const deleteRoleService = async (roleId, user) => {
         return tx.role.delete({
             where: { id: roleId, }, include: { RolePermission: true }
         });
+    }, {
+        maxWait: 10000,
+        timeout: 20000
     });
 };
 

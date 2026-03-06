@@ -50,12 +50,10 @@ let moduleObj = {
         UPDATE: "gallery_update",
         DELETE: "gallery_delete"
     },
-    SUBSCRIPTION: {  // This is your PLAN/SUBSCRIPTION module
+    SUBSCRIPTION: {
         MODULE: "subscription_module",
         VIEW: "subscription_view",
         CREATE: "subscription_create",
-        UPDATE: "subscription_update",  // Added for completeness
-        DELETE: "subscription_delete"   // Added for completeness
     },
 };
 
@@ -281,16 +279,6 @@ let screenList = [
             {
                 "key": moduleObj.SUBSCRIPTION.CREATE,
                 "label": "Create Subscription",
-                "access": false
-            },
-            {
-                "key": moduleObj.SUBSCRIPTION.UPDATE,
-                "label": "Update Subscription",
-                "access": false
-            },
-            {
-                "key": moduleObj.SUBSCRIPTION.DELETE,
-                "label": "Delete Subscription",
                 "access": false
             }
         ]
