@@ -40,7 +40,7 @@ const loginService = async ({ email, password, deviceId }) => {
       { id: user.id, email: user.email, role: user.role, roleId: user.roleId, companyId: user.companyId, deviceId: deviceId, role: roleInfo?.name || "" },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: process.env.JWT_EXPIRE_TIME,
       }
     );
 
@@ -180,7 +180,7 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
       { id: newUser.id, email: newUser.email, role:isCustomer ? ROLE_CUSTOMER :  ROLE_OWNER, companyId: newUser.companyId, deviceId },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: process.env.JWT_EXPIRE_TIME,
       }
     );
 

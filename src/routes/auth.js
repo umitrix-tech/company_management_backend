@@ -44,7 +44,7 @@ router.get(
         email: req.user.email
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: process.env.JWT_EXPIRE_TIME }
     );
 
     res.redirect(`http://localhost:5500/success.html?token=${token}`);
