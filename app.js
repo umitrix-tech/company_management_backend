@@ -6,6 +6,8 @@ const hocError = require("./src/utils/hocError");
 const logger = require("./src/utils/logger");
 const cors = require("cors");
 const app = express();
+const session = require("express-session");
+const passport = require("./src/utils/passport");
 
 app.use(express.json());
 
@@ -14,6 +16,26 @@ app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({ origin: "*" }));
 
+
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use((req, res, next) => {
   console.log(req.method, "method");
   logger.info(`${req.method} ${req.url} `);
@@ -21,6 +43,9 @@ app.use((req, res, next) => {
   logger.info(`params : ${JSON.stringify(req.query)}  `);
   next();
 });
+
+
+
 
 app.use("/api", routes);
 

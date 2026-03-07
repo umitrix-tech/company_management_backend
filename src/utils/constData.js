@@ -287,6 +287,7 @@ let screenList = [
 
 module.exports = {
     ROLE_OWNER: "Owner",
+    ROLE_CUSTOMER:"Customer",
     TEMP_PASSWORD: "Test@123",
 
     //Role info

@@ -72,13 +72,16 @@ const createRoleService = async (data, user) => {
  */
 const getRolesService = async (payload, user) => {
     try {
+
+        const {companyId} = user;
         const { search = "" } = payload;
         return await prisma.role.findMany({
             where: {
                 name: {
                     contains: search, mode: "insensitive",
                     not: ROLE_OWNER
-                }
+                },
+                companyId:parseInt(companyId)
             },
             include: {
                 RolePermission: {

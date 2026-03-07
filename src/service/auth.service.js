@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const { sendOTPEmail } = require("../utils/emil");
-const { ROLE_OWNER } = require("../utils/constData");
+const { ROLE_OWNER, ROLE_CUSTOMER } = require("../utils/constData");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 
 const loginService = async ({ email, password, deviceId }) => {
@@ -129,7 +129,7 @@ const otpSendService = async ({ email }) => {
   };
 }
 
-const verifyOtpService = async ({ email, otp, deviceId = "" }) => {
+const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false }) => {
 
   if (!deviceId) {
     throw new AppError("device Id missing")
@@ -177,7 +177,7 @@ const verifyOtpService = async ({ email, otp, deviceId = "" }) => {
     });
 
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, role: ROLE_OWNER, companyId: newUser.companyId, deviceId },
+      { id: newUser.id, email: newUser.email, role:isCustomer ? ROLE_CUSTOMER :  ROLE_OWNER, companyId: newUser.companyId, deviceId },
       process.env.JWT_SECRET,
       {
         expiresIn: "1h",
