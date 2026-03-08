@@ -1,9 +1,9 @@
+require('dotenv').config();
 const app = require("./app");
 const socketApp = require("./src/socket/socketServer");
 const prisma = require("./prisma");
 const port = process.env.PORT || 8081;
 const socketPort = 8082;
-require('dotenv').configDotenv();
 require("./src/utils/clear.cron");
 
 prisma
