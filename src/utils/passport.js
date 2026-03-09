@@ -1,5 +1,7 @@
 const passport = require("passport");
 const prisma = require("../../prisma");
+const bcrypt = require("bcryptjs");
+
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 passport.use(
