@@ -47,7 +47,7 @@ router.get(
       { expiresIn: process.env.JWT_EXPIRE_TIME }
     );
 
-    res.redirect(`http://localhost:5500/success.html?token=${token}`);
+    res.redirect(`https://dev.umitrix.in/?token=${token}`);
   }
 );
 
