@@ -10,6 +10,7 @@ const {
   listPunchLogController,
   listEmployeeAttendanceController,
   employeeAttendanceDashboardController,
+  downloadPunchLogExcelController,
 } = require("../controller/punchLog.controller");
 
 const {
@@ -18,6 +19,7 @@ const {
   listPunchLogSchema,
   listEmployeeAttendanceSchema,
   employeeAttendanceDashboardSchema,
+  downloadPunchLogExcelSchema,
 } = require("../validation/punchLog.validation");
 
 // PUNCH IN
@@ -57,6 +59,13 @@ router.get(
   auth,
   validate(employeeAttendanceDashboardSchema),
   employeeAttendanceDashboardController
+);
+
+router.get(
+  "/download-excel",
+  auth,
+  validate(downloadPunchLogExcelSchema),
+  downloadPunchLogExcelController
 );
 
 module.exports = router;

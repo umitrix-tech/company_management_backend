@@ -5,6 +5,7 @@ const {
   listPunchLogService,
   listEmployeeAttendanceService,
   employeeAttendanceDashboardService,
+  downloadPunchLogExcelService,
 } = require("../service/punchLog.service");
 
 const punchInController = catchAsync(async (req, res) => {
@@ -36,13 +37,28 @@ const employeeAttendanceDashboardController = catchAsync(async (req, res) => {
 
 });
 
+const downloadPunchLogExcelController = catchAsync(async (req, res) => {
+  const buffer = await downloadPunchLogExcelService(req.query, req.user);
+
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=punch_logs_${req.query.userId || req.user.id}.xlsx`
+  );
+
+  res.status(200).send(buffer);
+});
 
 module.exports = {
-    punchInController,
-    punchOutController,
-    listPunchLogController,
-    listEmployeeAttendanceController,
-    employeeAttendanceDashboardController
-}
+  punchInController,
+  punchOutController,
+  listPunchLogController,
+  listEmployeeAttendanceController,
+  employeeAttendanceDashboardController,
+  downloadPunchLogExcelController,
+};
 
 

@@ -1,4 +1,5 @@
 const { PunchLogType, workHoursModal, PunchSource } = require("@prisma/client");
+const exceljs = require("exceljs");
 const prisma = require("../../prisma");
 const AppError = require("../utils/AppError");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
@@ -485,11 +486,88 @@ const employeeAttendanceDashboardService = async (query, user) => {
 
 };
 
+const downloadPunchLogExcelService = async (query, user) => {
+  try {
+    const { userId, startDate, endDate } = query;
+
+    let targetUserId = userId ? Number(userId) : user.id;
+
+    const userDetails = await prisma.user.findFirst({
+      where: {
+        id: targetUserId,
+        companyId: user.companyId,
+      },
+      select: {
+        name: true,
+        empCode: true,
+        email: true,
+      },
+    });
+
+    if (!userDetails) {
+      throw new AppError("User not found or you don't have access", 404);
+    }
+
+    const dateFilter = {};
+    if (startDate) dateFilter.gte = new Date(startDate);
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
+    }
+
+    const where = {
+      userId: targetUserId,
+      companyId: user.companyId,
+      ...(Object.keys(dateFilter).length && { punchIn: dateFilter }),
+    };
+
+    const logs = await prisma.punchLog.findMany({
+      where,
+      orderBy: { punchIn: "asc" },
+    });
+
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet("Punch Logs");
+
+    worksheet.columns = [
+      { header: "Date", key: "date", width: 15 },
+      { header: "Employee Name", key: "empName", width: 25 },
+      { header: "Employee Code", key: "empCode", width: 15 },
+      { header: "Punch In", key: "punchIn", width: 25 },
+      { header: "Punch Out", key: "punchOut", width: 25 },
+      { header: "Source", key: "source", width: 15 },
+      { header: "Remarks", key: "remarks", width: 15 },
+    ];
+
+    // Styling the header row
+    worksheet.getRow(1).font = { bold: true };
+
+    logs.forEach((log) => {
+      worksheet.addRow({
+        date: log.punchIn ? new Date(log.punchIn).toISOString().split("T")[0] : "-",
+        empName: userDetails.name,
+        empCode: userDetails.empCode,
+        punchIn: log.punchIn ? new Date(log.punchIn).toLocaleString() : "-",
+        punchOut: log.punchOut ? new Date(log.punchOut).toLocaleString() : "-",
+        source: log.punchSource || "-",
+        remarks: log.remarks || "-",
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
 
 module.exports = {
   listPunchLogService,
   punchInService,
   punchOutService,
   listEmployeeAttendanceService,
-  employeeAttendanceDashboardService
+  employeeAttendanceDashboardService,
+  downloadPunchLogExcelService
 }

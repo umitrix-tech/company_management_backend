@@ -25,6 +25,12 @@ const listPunchLogSchema = Joi.object({
   limit: Joi.number().min(1).default(10),
 });
 
+const downloadPunchLogExcelSchema = Joi.object({
+  userId: Joi.number().integer().required(),
+  startDate: Joi.date().required(),
+  endDate: Joi.date().required(),
+});
+
 
 
 const listEmployeeAttendanceSchema = Joi.object({
@@ -44,5 +50,6 @@ module.exports = {
   punchOutSchema,
   listPunchLogSchema,
   listEmployeeAttendanceSchema,
-  employeeAttendanceDashboardSchema
+  employeeAttendanceDashboardSchema,
+  downloadPunchLogExcelSchema,
 };
