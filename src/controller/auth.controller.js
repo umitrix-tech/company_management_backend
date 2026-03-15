@@ -8,7 +8,7 @@ const loginController = catchAsync(async (req, res) => {
 });                  
 
 const infoController = catchAsync(async (req, res) => {
-  const responce = await infoService(req, req.user);
+  const responce = await infoService(req.query, req.user);
   res.status(200).json({ message: "Login successful", data: responce });
 })
 
@@ -23,7 +23,6 @@ const verifyOtpController = catchAsync(async (req, res) => {
   const responce = await verifyOtpService({ ...req.body, deviceId });
   res.status(200).json({ message: "OTP verified successfully", data: responce });
 });
-
 
 
 module.exports = {

@@ -1,7 +1,7 @@
 const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
-const { ROLE_OWNER } = require("../utils/constData");
+const { ROLE_OWNER, USER_BACKEND_STATUS } = require("../utils/constData");
 const jwt = require("jsonwebtoken");
 
 const createCompanyService = async (payload, user) => {
@@ -66,6 +66,7 @@ const createCompanyService = async (payload, user) => {
       data: {
         companyId: responce.id,
         roleId: role.id,
+        backEndStatus:USER_BACKEND_STATUS.company_created
       },
     });
 

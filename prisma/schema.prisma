@@ -163,6 +163,7 @@ model User {
   SecondaryMobile String?
   isDetele        Boolean    @default(false)
   status          UserStates @default(ACTIVE)
+  backEndStatus   String?
   documets        String[]   @default([])
 
   createdAt DateTime @default(now())

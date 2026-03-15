@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
 const prisma = require("../../prisma");
 const { sendOTPEmail } = require("../utils/emil");
-const { ROLE_OWNER, ROLE_CUSTOMER } = require("../utils/constData");
+const { ROLE_OWNER, ROLE_CUSTOMER, USER_BACKEND_STATUS } = require("../utils/constData");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
 
 const loginService = async ({ email, password, deviceId }) => {
@@ -64,6 +64,33 @@ const loginService = async ({ email, password, deviceId }) => {
 const infoService = async (req, user) => {
   try {
     const { companyId = "", id = "" } = user;
+    const { isOauth } = req;
+
+
+    if (isOauth) {
+      const userInfo = await prisma.user.findFirst
+      ({
+        where:{
+          id:parseInt(id)
+        },
+        include:{
+          role:true
+        },
+        omit:{
+          password:true,
+          isDetele:true,
+          updatedAt:true,
+          createdAt:true,
+        }
+      }) 
+      
+      if(!userInfo){
+        throw AppError("Invalid user", 401);
+      }
+
+      return userInfo;
+    }
+
 
     if (!companyId || !id) {
       throw AppError("Invalid user", 401);
@@ -94,6 +121,7 @@ const infoService = async (req, user) => {
       companyInfo
     };
   } catch (error) {
+    
     throw catchAsyncPrismaError(error)
   }
 }
@@ -172,7 +200,8 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
         email,
         name: email.split("@")[0],
         password,
-        empCode: "0001"
+        empCode: Date.now().toString(),
+        backEndStatus:USER_BACKEND_STATUS.only_login
       },
     });
 
@@ -232,6 +261,7 @@ const rolePermissonCheck = async (user, accessKey = "") => {
     throw catchAsyncPrismaError(error);
   }
 }
+
 
 module.exports = {
   loginService,

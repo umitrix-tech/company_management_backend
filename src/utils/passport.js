@@ -1,6 +1,7 @@
 const passport = require("passport");
 const prisma = require("../../prisma");
 const bcrypt = require("bcryptjs");
+const { USER_BACKEND_STATUS } = require("./constData");
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
@@ -31,6 +32,8 @@ passport.use(
             data: {
               email,
               name: profile.displayName,
+              empCode:Date.now().toString(),
+              backEndStatus:USER_BACKEND_STATUS.only_login,
               // photo: profile.photos?.[0]?.value || "",
               password: password, // OAuth users no password
             }

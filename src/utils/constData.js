@@ -290,6 +290,11 @@ module.exports = {
     ROLE_CUSTOMER:"Customer",
     TEMP_PASSWORD: "Test@123",
 
+    USER_BACKEND_STATUS:{
+        "only_login":"only_login",
+        "company_created":"company_created",
+    },
+
     //Role info
     moduleAccess: moduleObj,
     screenRoleInfo: screenList
