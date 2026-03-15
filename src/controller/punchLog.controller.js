@@ -4,6 +4,7 @@ const {
   punchOutService,
   listPunchLogService,
   listEmployeeAttendanceService,
+  employeeAttendanceDashboardService,
 } = require("../service/punchLog.service");
 
 const punchInController = catchAsync(async (req, res) => {
@@ -26,11 +27,22 @@ const listEmployeeAttendanceController = catchAsync(async (req, res) => {
   res.status(200).json(data);
 });
 
+const employeeAttendanceDashboardController = catchAsync(async (req, res) => {
+  const data = await employeeAttendanceDashboardService(req.query, req.user);
+  res.status(200).json({
+    message: "Employee attendance dashboard fetched successfully",
+    data
+  });
+
+});
+
+
 module.exports = {
     punchInController,
     punchOutController,
     listPunchLogController,
-    listEmployeeAttendanceController
+    listEmployeeAttendanceController,
+    employeeAttendanceDashboardController
 }
 
 

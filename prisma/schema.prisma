@@ -261,6 +261,12 @@ enum PunchLogType {
   LOGFIX
 }
 
+enum PunchSource {
+  WEB
+  MOBILE
+  BIOMETRIC
+}
+
 model PunchLog {
   id        Int          @id @default(autoincrement())
   userId    Int
@@ -268,6 +274,7 @@ model PunchLog {
   punchOut  DateTime?
   remarks   PunchLogType
   updatedBy Int
+    punchSource PunchSource @default(WEB)
   companyId Int
 
   company   Company      @relation(fields: [companyId], references: [id])

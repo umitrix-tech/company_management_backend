@@ -1,4 +1,4 @@
-const { PunchLogType, workHoursModal } = require("@prisma/client");
+const { PunchLogType, workHoursModal, PunchSource } = require("@prisma/client");
 const prisma = require("../../prisma");
 const AppError = require("../utils/AppError");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
@@ -303,6 +303,8 @@ const listPunchLogService = async (query, user) => {
     throw catchAsyncPrismaError(error);
   }
 };
+
+
 const listEmployeeAttendanceService = async (query, user) => {
   try {
 
@@ -330,8 +332,6 @@ const listEmployeeAttendanceService = async (query, user) => {
       })
     };
 
-    // ❌ Removed prisma.$transaction
-    // ✅ Using Promise.all instead
 
     const [employees, total] = await Promise.all([
       prisma.user.findMany({
@@ -403,10 +403,93 @@ const listEmployeeAttendanceService = async (query, user) => {
   }
 };
 
+const employeeAttendanceDashboardService = async (query, user) => {
+
+  try {
+
+    const date = query.date ? new Date(query.date) : new Date();
+
+    const start = new Date(date);
+    start.setHours(0,0,0,0);
+
+    const end = new Date(date);
+    end.setHours(23,59,59,999);
+
+    const companyId = user.companyId;
+
+    // total employees
+    const totalEmployees = await prisma.user.count({
+      where: {
+        companyId,
+        isDetele: false
+      }
+    });
+
+    // today's punch logs
+    const logs = await prisma.punchLog.findMany({
+      where: {
+        companyId,
+        punchIn: {
+          gte: start,
+          lte: end
+        }
+      },
+      select: {
+        userId: true,
+        punchOut: true,
+        punchSource: true
+      }
+    });
+
+    const punchInSet = new Set();
+    const punchOutSet = new Set();
+    const webSet = new Set();
+    const mobileSet = new Set();
+
+    logs.forEach(log => {
+
+      punchInSet.add(log.userId);
+
+      if (log.punchOut) {
+        punchOutSet.add(log.userId);
+      }
+
+      if (log.puchVia === PunchSource.BIOMETRIC) {
+        webSet.add(log.userId);
+      }
+
+      if (log.puchVia === PunchSource.MOBILE  || log.puchVia === PunchSource.WEB) {
+        mobileSet.add(log.userId);
+      }
+
+    });
+
+    const totalPunchIn = punchInSet.size;
+    const totalPunchOut = punchOutSet.size;
+
+    const notPunched = totalEmployees - totalPunchIn;
+
+    return {
+      totalEmployees,
+      totalPunchIn,
+      totalPunchOut,
+      notPunched,
+      webPunch: webSet.size,
+      mobilePunch: mobileSet.size
+    };
+
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+
+  }
+
+};
+
 
 module.exports = {
   listPunchLogService,
   punchInService,
   punchOutService,
-  listEmployeeAttendanceService
+  listEmployeeAttendanceService,
+  employeeAttendanceDashboardService
 }

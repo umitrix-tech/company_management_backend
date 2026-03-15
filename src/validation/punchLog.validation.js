@@ -35,9 +35,14 @@ const listEmployeeAttendanceSchema = Joi.object({
   pageSize: Joi.number().integer().min(1).default(10),
 });
 
+const employeeAttendanceDashboardSchema = Joi.object({
+  date: Joi.date().optional()
+});
+
 module.exports = {
   punchInSchema,
   punchOutSchema,
   listPunchLogSchema,
-  listEmployeeAttendanceSchema
+  listEmployeeAttendanceSchema,
+  employeeAttendanceDashboardSchema
 };

@@ -9,6 +9,7 @@ const {
   punchOutController,
   listPunchLogController,
   listEmployeeAttendanceController,
+  employeeAttendanceDashboardController,
 } = require("../controller/punchLog.controller");
 
 const {
@@ -16,6 +17,7 @@ const {
   punchOutSchema,
   listPunchLogSchema,
   listEmployeeAttendanceSchema,
+  employeeAttendanceDashboardSchema,
 } = require("../validation/punchLog.validation");
 
 // PUNCH IN
@@ -47,6 +49,14 @@ router.get(
   auth,
   validate(listEmployeeAttendanceSchema),
   listEmployeeAttendanceController
+);
+
+
+router.get(
+  "/employee-attendance-dashboard",
+  auth,
+  validate(employeeAttendanceDashboardSchema),
+  employeeAttendanceDashboardController
 );
 
 module.exports = router;
