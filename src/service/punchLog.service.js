@@ -303,10 +303,110 @@ const listPunchLogService = async (query, user) => {
     throw catchAsyncPrismaError(error);
   }
 };
+const listEmployeeAttendanceService = async (query, user) => {
+  try {
+
+    let { search, date, page = 1, pageSize = 10 } = query;
+
+    page = Number(page);
+    pageSize = Number(pageSize);
+
+    const skip = (page - 1) * pageSize;
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const whereUser = {
+      companyId: user.companyId,
+
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { empCode: { contains: search, mode: "insensitive" } }
+        ]
+      })
+    };
+
+    // ❌ Removed prisma.$transaction
+    // ✅ Using Promise.all instead
+
+    const [employees, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereUser,
+        skip,
+        take: pageSize,
+
+        select: {
+          id: true,
+          name: true,
+          empCode: true,
+
+          punchLog: {
+            where: {
+              punchIn: {
+                gte: start,
+                lte: end
+              }
+            },
+            orderBy: {
+              punchIn: "desc"
+            },
+            take: 1
+          }
+        }
+      }),
+
+      prisma.user.count({
+        where: whereUser
+      })
+    ]);
+
+    const data = employees.map((emp) => {
+
+      const log = emp.punchLog[0];
+
+      let status = "ABSENT";
+
+      if (log) {
+        if (log.remarks === "LEAVE") status = "LEAVE";
+        else status = "PRESENT";
+      }
+
+      return {
+        id: emp.id,
+        empCode: emp.empCode,
+        name: emp.name,
+        lastPunchIn: log?.punchIn || null,
+        lastPunchOut: log?.punchOut || null,
+        status
+      };
+
+    });
+
+    return {
+      data,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    };
+
+  } catch (error) {
+    console.log(error, "attendance list error");
+
+    throw catchAsyncPrismaError(error);
+  }
+};
 
 
 module.exports = {
   listPunchLogService,
   punchInService,
-  punchOutService
+  punchOutService,
+  listEmployeeAttendanceService
 }

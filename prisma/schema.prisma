@@ -173,11 +173,11 @@ model User {
   company                  Company?          @relation(fields: [companyId], references: [id])
   role                     Role?             @relation(fields: [roleId], references: [id])
   roleId                   Int?
-  punchId                  Int?
-  PunchLog                 PunchLog?         @relation(fields: [punchId], references: [id])
+  // PunchLog                 PunchLog         @relation(fields: [punchId], references: [id])
   chatParticipants         ChatParticipant[]
   messages                 Message[]
   messageReads             MessageRead[]
+  punchLog PunchLog[]
 
   @@unique([companyId, empCode])
   @@unique([companyId, uanNumber])
@@ -269,8 +269,10 @@ model PunchLog {
   remarks   PunchLogType
   updatedBy Int
   companyId Int
+
   company   Company      @relation(fields: [companyId], references: [id])
-  users     User[]
+  user      User    @relation(fields: [userId], references: [id])
+
 
   @@index([userId])
   @@index([companyId])

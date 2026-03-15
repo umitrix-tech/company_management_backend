@@ -25,8 +25,19 @@ const listPunchLogSchema = Joi.object({
   limit: Joi.number().min(1).default(10),
 });
 
+
+
+const listEmployeeAttendanceSchema = Joi.object({
+  search: Joi.string().allow("", null).optional(),
+  date: Joi.date().required(),
+
+  page: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).default(10),
+});
+
 module.exports = {
   punchInSchema,
   punchOutSchema,
   listPunchLogSchema,
+  listEmployeeAttendanceSchema
 };

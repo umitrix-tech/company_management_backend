@@ -8,12 +8,14 @@ const {
   punchInController,
   punchOutController,
   listPunchLogController,
+  listEmployeeAttendanceController,
 } = require("../controller/punchLog.controller");
 
 const {
   punchInSchema,
   punchOutSchema,
   listPunchLogSchema,
+  listEmployeeAttendanceSchema,
 } = require("../validation/punchLog.validation");
 
 // PUNCH IN
@@ -38,6 +40,13 @@ router.get(
   auth,
   validate(listPunchLogSchema),
   listPunchLogController
+);
+
+router.get(
+  "/employee-attendance",
+  auth,
+  validate(listEmployeeAttendanceSchema),
+  listEmployeeAttendanceController
 );
 
 module.exports = router;
