@@ -46,8 +46,7 @@ router.get(
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE_TIME }
     );
-
-    res.redirect(`https://dev.umitrix.in/?token=${token}`);
+    res.redirect(`https://dev.umitrix.in/auth-success?token=${token}`);
   }
 );
 
