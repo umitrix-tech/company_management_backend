@@ -33,6 +33,12 @@ const downloadPunchLogExcelSchema = Joi.object({
 
 
 
+const particularEmployeeAttendanceSchema = Joi.object({
+  userId: Joi.number().integer().required(),
+  startDate: Joi.date().required(),
+  endDate: Joi.date().required(),
+});
+
 const listEmployeeAttendanceSchema = Joi.object({
   search: Joi.string().allow("", null).optional(),
   date: Joi.date().required(),
@@ -52,4 +58,5 @@ module.exports = {
   listEmployeeAttendanceSchema,
   employeeAttendanceDashboardSchema,
   downloadPunchLogExcelSchema,
+  particularEmployeeAttendanceSchema,
 };

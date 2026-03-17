@@ -91,7 +91,6 @@ const infoService = async (req, user) => {
       return userInfo;
     }
 
-
     if (!companyId || !id) {
       throw new AppError("Invalid user", 401);
     }

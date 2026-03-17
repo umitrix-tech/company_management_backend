@@ -11,6 +11,7 @@ const {
   listEmployeeAttendanceController,
   employeeAttendanceDashboardController,
   downloadPunchLogExcelController,
+  particularEmployeeAttendanceController,
 } = require("../controller/punchLog.controller");
 
 const {
@@ -20,6 +21,7 @@ const {
   listEmployeeAttendanceSchema,
   employeeAttendanceDashboardSchema,
   downloadPunchLogExcelSchema,
+  particularEmployeeAttendanceSchema,
 } = require("../validation/punchLog.validation");
 
 // PUNCH IN
@@ -66,6 +68,13 @@ router.get(
   auth,
   validate(downloadPunchLogExcelSchema),
   downloadPunchLogExcelController
+);
+
+router.get(
+  "/particular-employee-attendance",
+  auth,
+  validate(particularEmployeeAttendanceSchema),
+  particularEmployeeAttendanceController
 );
 
 module.exports = router;

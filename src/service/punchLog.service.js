@@ -486,6 +486,80 @@ const employeeAttendanceDashboardService = async (query, user) => {
 
 };
 
+const particularEmployeeAttendanceService = async (query, user) => {
+  try {
+    let { startDate, endDate, userId } = query;
+
+    const targetUser = await prisma.user.findFirst({
+      where: {
+        id: Number(userId),
+        companyId: user.companyId,
+      },
+    });
+
+    if (!targetUser) {
+      throw new AppError("User not found or you don't have access", 404);
+    }
+
+    const dateFilter = {};
+    if (startDate) dateFilter.gte = new Date(startDate);
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Include the whole end day
+      dateFilter.lte = end;
+    }
+
+    const where = {
+      userId: Number(userId),
+      companyId: user.companyId,
+      ...(Object.keys(dateFilter).length && { punchIn: dateFilter }),
+    };
+
+
+    console.log(where,'where');
+    
+    const data = await prisma.punchLog.findMany({
+      where,
+      orderBy: { punchIn: "desc" },
+    });
+
+    // --- Group by date ---
+    const formatDateKey = (date) => {
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}:${month}:${year}`;
+    };
+
+    const groupedData = data.reduce((acc, log) => {
+      const dateKey = formatDateKey(log.punchIn);
+      if (!acc[dateKey]) acc[dateKey] = [];
+      acc[dateKey].push(log);
+      return acc;
+    }, {});
+
+    const holidayList = await prisma.particularDateConfig.findMany({
+      where: {
+        companyId: user.companyId,
+        date: dateFilter,
+      },
+    });
+
+    return {
+      user: {
+        id: targetUser.id,
+        name: targetUser.name,
+        empCode: targetUser.empCode,
+      },
+      data: groupedData,
+      holidayList,
+    };
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
 const downloadPunchLogExcelService = async (query, user) => {
   try {
     const { userId, startDate, endDate } = query;
@@ -569,5 +643,6 @@ module.exports = {
   punchOutService,
   listEmployeeAttendanceService,
   employeeAttendanceDashboardService,
-  downloadPunchLogExcelService
+  downloadPunchLogExcelService,
+  particularEmployeeAttendanceService,
 }

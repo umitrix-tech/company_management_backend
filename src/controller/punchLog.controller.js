@@ -6,6 +6,7 @@ const {
   listEmployeeAttendanceService,
   employeeAttendanceDashboardService,
   downloadPunchLogExcelService,
+  particularEmployeeAttendanceService,
 } = require("../service/punchLog.service");
 
 const punchInController = catchAsync(async (req, res) => {
@@ -52,6 +53,11 @@ const downloadPunchLogExcelController = catchAsync(async (req, res) => {
   res.status(200).send(buffer);
 });
 
+const particularEmployeeAttendanceController = catchAsync(async (req, res) => {
+  const data = await particularEmployeeAttendanceService(req.query, req.user);
+  res.status(200).json(data);
+});
+
 module.exports = {
   punchInController,
   punchOutController,
@@ -59,6 +65,7 @@ module.exports = {
   listEmployeeAttendanceController,
   employeeAttendanceDashboardController,
   downloadPunchLogExcelController,
+  particularEmployeeAttendanceController,
 };
 
 
