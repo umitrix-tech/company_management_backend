@@ -85,7 +85,7 @@ const infoService = async (req, user) => {
       }) 
       
       if(!userInfo){
-        throw AppError("Invalid user", 401);
+        throw new AppError("Invalid user", 401);
       }
 
       return userInfo;
@@ -93,7 +93,7 @@ const infoService = async (req, user) => {
 
 
     if (!companyId || !id) {
-      throw AppError("Invalid user", 401);
+      throw new AppError("Invalid user", 401);
     }
 
     let roleInfo = null;
