@@ -32,8 +32,6 @@ const loginService = async ({ email, password, deviceId }) => {
     let roleInfo = null;
     if (user.roleId && user.companyId) {
       roleInfo = await prisma.role.findUnique({ where: { id: parseInt(user.roleId) }, include: { RolePermission: true } });
-      console.log(roleInfo, 'roleInfo');
-
     }
 
     const token = jwt.sign(
@@ -45,8 +43,6 @@ const loginService = async ({ email, password, deviceId }) => {
     );
 
 
-
-
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
 
     return {
@@ -54,8 +50,6 @@ const loginService = async ({ email, password, deviceId }) => {
       plan
     };
   } catch (error) {
-    console.log(error, 'er');
-
     throw catchAsyncPrismaError(error)
   }
 
@@ -156,6 +150,79 @@ const otpSendService = async ({ email }) => {
   };
 }
 
+
+const forgotPasswordOtpService = async ({ email }) => {
+  // Check if user already exists
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AppError("User does't exists, Please sign up", 400);
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  let responce = null;
+  try {
+    responce = await prisma.otpStroe.create({
+      data: {
+        email,
+        otp,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP valid for 10 minutes
+      },
+    });
+    await sendOTPEmail(email, otp);
+  } catch (error) {
+    console.error("Error creating OTP store entry:", error);
+    throw new AppError("Failed to generate OTP", 500);
+  }
+
+  return {
+    email: responce.email,
+    expiresAt: responce.expiresAt,
+  };
+}
+
+
+const passwordChangeService = async(payload, user) => {
+
+ try {
+  console.log(user);
+  
+     const {companyId, id} = user;
+  const {password} = payload
+
+  const userInfo = await prisma.user.findUnique({
+    where:{
+      id:parseInt(id),
+      companyId:parseInt(companyId)
+    }
+  })
+
+  if (!userInfo) {
+    throw new AppError("User is not found , check you admin team", 403);
+  }
+
+  const Convertedpassword = await bcrypt.hash(password, 10);
+
+
+  return await prisma.user.update({
+   where:{
+       id:parseInt(id),
+      companyId:parseInt(companyId)
+    },
+    data:{
+      ...userInfo,
+      password:Convertedpassword
+    }
+  })
+
+ } catch (error) {
+  throw catchAsyncPrismaError(error)  
+ }
+
+}
+
+
+
 const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false }) => {
 
   if (!deviceId) {
@@ -182,13 +249,26 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
       where: { id: otpEntry.id },
       data: { isVerified: true, expiresAt: new Date() },
     });
-    const isExistUser = await prisma.user.findUnique({ where: { email } });
+    const isExistUser = await prisma.user.findUnique({ where: { email }, include:{role:true} });
 
     if (isExistUser) {
+
+          const token = jwt.sign(
+      { id: isExistUser.id, email: isExistUser.email, role: isExistUser.role.name, roleId: isExistUser.role.id, companyId: isExistUser.companyId, deviceId: deviceId,},
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRE_TIME,
+      }
+    );
       responce = {
         ...responce,
-        newUser: false
+        newUser: false,
+        token
+        
       }
+
+   
+
       return responce;
     }
 
@@ -267,5 +347,7 @@ module.exports = {
   otpSendService,
   verifyOtpService,
   infoService,
-  rolePermissonCheck
+  rolePermissonCheck,
+  forgotPasswordOtpService,
+  passwordChangeService
 }

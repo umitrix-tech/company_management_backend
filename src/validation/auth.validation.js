@@ -15,11 +15,16 @@ const otpSendSchema = Joi.object({
 });
 
 
+const passwordChange = Joi.object({
+  password:Joi.string().required()
+})
+
 
 module.exports = {
   authValidator: {
     login: loginSchema,
     verifyOtp: verifyOtpSchema,
     otpSend: otpSendSchema,
+    passwordChange
   },
 };

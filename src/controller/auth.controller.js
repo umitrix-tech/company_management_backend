@@ -1,4 +1,4 @@
-const { loginService, otpSendService, verifyOtpService, infoService } = require("../service/auth.service");
+const { loginService, otpSendService, verifyOtpService, infoService, forgotPasswordOtpService, passwordChangeService } = require("../service/auth.service");
 const catchAsync = require("../utils/catchAsync");
 
 const loginController = catchAsync(async (req, res) => {
@@ -17,6 +17,17 @@ const otpSendController = catchAsync(async (req, res) => {
   res.status(200).json({ message: "Otp Send succssfully", data: responce });
 });
 
+const forgotPasswordOtpContrller = catchAsync(async (req, res) => {
+  const responce = await forgotPasswordOtpService(req.body);
+  res.status(200).json({ message: "Otp Send succssfully", data: responce });
+});
+
+
+const passwordChangeController =  catchAsync(async (req, res) => {
+  const responce = await passwordChangeService(req.body, req.user);
+  res.status(200).json({ message: "Password Changed Successfully", data: responce });
+});
+
 
 const verifyOtpController = catchAsync(async (req, res) => {
   const deviceId = req.header("deviceId") || "";
@@ -25,11 +36,14 @@ const verifyOtpController = catchAsync(async (req, res) => {
 });
 
 
+
 module.exports = {
   loginController,
   otpSendController,
   verifyOtpController,
   infoController,
+  forgotPasswordOtpContrller,
+  passwordChangeController
   // registerController,
 };
 

@@ -7,6 +7,8 @@ const {
   otpSendController,
   verifyOtpController,
   infoController,
+  forgotPasswordOtpContrller,
+  passwordChangeController,
 } = require("../controller/auth.controller");
 const jwt = require("jsonwebtoken");
 const passport = require('../utils/passport')
@@ -16,11 +18,14 @@ const auth = require("../middleware/auth.middleware");
 router.post("/login", validate(authValidator.login), loginController);
 router.get("/info", auth, infoController);
 router.post("/otp/send", validate(authValidator.otpSend), otpSendController);
+router.post("/otp/send/forgotpassword", validate(authValidator.otpSend),forgotPasswordOtpContrller)
 router.post(
   "/otp/verify",
   validate(authValidator.verifyOtp),
   verifyOtpController,
 );
+
+router.post("/password/change", auth, validate(authValidator.passwordChange), passwordChangeController)
 
 
 router.get(
