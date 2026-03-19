@@ -16,5 +16,6 @@ router.use('/notes', require('./notes'));
 router.use('/gallery', require('./gallery'));
 router.use('/plan-history', require('./planHistory'));
 router.use('/subscription', require('./subscription'));
+router.use('/hierarchy', require('./hierarchy'));
 
 module.exports = router;
