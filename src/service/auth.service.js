@@ -254,7 +254,7 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
     if (isExistUser) {
 
           const token = jwt.sign(
-      { id: isExistUser.id, email: isExistUser.email, role: isExistUser.role.name, roleId: isExistUser.role.id, companyId: isExistUser.companyId, deviceId: deviceId,},
+      { id: isExistUser.id, email: isExistUser.email, role: isExistUser.role?.name, roleId: isExistUser.role?.id, companyId: isExistUser.companyId, deviceId: deviceId,},
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRE_TIME,
