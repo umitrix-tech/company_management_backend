@@ -103,6 +103,7 @@ model Company {
   chats                  Chat[]
   gallery                Gallery[]
   notes                  Notes[]
+  aiChatLogs             AiChatLog[]
 }
 
 model RolePermission {
@@ -182,6 +183,7 @@ model User {
   messages                 Message[]
   messageReads             MessageRead[]
   punchLog PunchLog[]
+  aiChatLogs AiChatLog[]
 
   @@unique([companyId, empCode])
   @@unique([companyId, uanNumber])
@@ -482,4 +484,19 @@ model Gallery {
   company   Company  @relation(fields: [companyId], references: [id])
 
   @@index([companyId])
+}
+
+model AiChatLog {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  userId    Int?
+  query     String
+  response  String   @db.Text
+  createdAt DateTime @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, createdAt])
 }

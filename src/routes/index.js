@@ -18,4 +18,6 @@ router.use('/plan-history', require('./planHistory'));
 router.use('/subscription', require('./subscription'));
 router.use('/hierarchy', require('./hierarchy'));
 
+router.use("/ai", require("./ai"));
+
 module.exports = router;
