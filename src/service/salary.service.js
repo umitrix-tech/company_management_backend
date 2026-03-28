@@ -324,7 +324,7 @@ class SalaryService {
           where: { id: loan.id },
           data: {
             remainingAmount: 0,
-            status: "COMPLETED",
+            status: "PRE_CLOSE_COMPLETED",
           },
         });
         break;
