@@ -73,7 +73,8 @@ const getLoanStatsSchema = Joi.object({
 });
 
 const loanActionSchema = Joi.object({
-  action: Joi.string().valid("PRE_CLOSE", "HOLD", "RESUME", "PARTIAL_PAYMENT").required(),
+  id:Joi.number().integer().min(1).required(),
+  action: Joi.string().valid("PRE_CLOSE", "HOLD", "RESUME", "PARTIAL_PAYMENT", "REOPEN").required(),
   amount: Joi.number().positive().when("action", {
     is: "PARTIAL_PAYMENT",
     then: Joi.required(),

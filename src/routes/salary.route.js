@@ -35,7 +35,7 @@ router.route("/loans")
   .post(validate(createLoanSchema), salaryController.createLoan)
   .get(validate(getLoansSchema), salaryController.getLoans);
 
-router.post("/loans/:id/action", validate(loanActionSchema), salaryController.handleLoanAction);
+router.post("/loans/action", validate(loanActionSchema), salaryController.handleLoanAction);
 
 router.get("/loan-stats", validate(getLoanStatsSchema), salaryController.getLoanStats);
 

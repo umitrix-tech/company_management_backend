@@ -179,9 +179,14 @@ class SalaryService {
     }
 
     const monthlyRate = interestRate / 12 / 100;
-    const emiAmount =
-      (principalAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
-      (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+    let emiAmount = 0;
+    if (monthlyRate > 0) {
+      emiAmount =
+        (principalAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
+        (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+    } else {
+      emiAmount = principalAmount / tenureMonths;
+    }
     
     const totalRepayable = emiAmount * tenureMonths;
 
@@ -298,8 +303,8 @@ class SalaryService {
     };
   }
 
-  async processLoanAction(loanId, data) {
-    const { action, amount } = data;
+  async processLoanAction( data) {
+    const { action, amount, id:loanId } = data;
     const loan = await prisma.loan.findUnique({ where: { id: Number(loanId) } });
     if (!loan) throw new AppError("Loan not found", 404);
 
@@ -327,7 +332,7 @@ class SalaryService {
       case "HOLD":
         updatedLoan = await prisma.loan.update({
           where: { id: loan.id },
-          data: { status: "HELD" },
+          data: { status: "HOLD" },
         });
         break;
 
@@ -335,6 +340,32 @@ class SalaryService {
         updatedLoan = await prisma.loan.update({
           where: { id: loan.id },
           data: { status: "ACTIVE" },
+        });
+        break;
+
+      case "REOPEN":
+        // Find the last manual repayment (no salary slip)
+        const lastManualRepayment = await prisma.loanRepayment.findFirst({
+          where: { loanId: loan.id, salarySlipId: null },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (!lastManualRepayment) {
+          throw new AppError("No manual repayment found to revert.", 400);
+        }
+
+        const amountToRestore = lastManualRepayment.amount;
+
+        // Delete the repayment record
+        await prisma.loanRepayment.delete({ where: { id: lastManualRepayment.id } });
+
+        // Restore balance and status
+        updatedLoan = await prisma.loan.update({
+          where: { id: loan.id },
+          data: {
+            remainingAmount: loan.remainingAmount + amountToRestore,
+            status: "ACTIVE",
+          },
         });
         break;
 
@@ -348,10 +379,31 @@ class SalaryService {
           },
         });
         const newRemaining = loan.remainingAmount - paymentAmount;
+        
+        let newEmi = loan.emiAmount;
+        if (newRemaining > 0) {
+          const paidEMIs = await prisma.loanRepayment.count({
+            where: { loanId: loan.id, salarySlipId: { not: null } }
+          });
+          const remainingTenure = loan.tenureMonths - paidEMIs;
+          
+          if (remainingTenure > 0) {
+            const monthlyRate = loan.interestRate / 12 / 100;
+            if (monthlyRate > 0) {
+              newEmi = (newRemaining * monthlyRate * Math.pow(1 + monthlyRate, remainingTenure)) /
+                       (Math.pow(1 + monthlyRate, remainingTenure) - 1);
+            } else {
+              newEmi = newRemaining / remainingTenure;
+            }
+            newEmi = Math.round(newEmi * 100) / 100;
+          }
+        }
+
         updatedLoan = await prisma.loan.update({
           where: { id: loan.id },
           data: {
             remainingAmount: newRemaining,
+            emiAmount: newRemaining <= 0 ? 0 : newEmi,
             status: newRemaining <= 0 ? "COMPLETED" : loan.status,
           },
         });
