@@ -12,6 +12,22 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ComponentType {
+  EARNING
+  DEDUCTION
+}
+
+enum ValueType {
+  FIXED
+  PERCENTAGE
+}
+
+enum SalaryMode {
+  MONTHLY
+  DAILY
+  HOURLY
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -104,6 +120,13 @@ model Company {
   gallery                Gallery[]
   notes                  Notes[]
   aiChatLogs             AiChatLog[]
+
+  salaryTemplates   SalaryTemplate[]
+  employeeSalaries  EmployeeSalary[]
+  salarySlips       SalarySlip[]
+  attendances       Attendance[]
+  salaryAdjustments SalaryAdjustment[]
+  loans             Loan[]
 }
 
 model RolePermission {
@@ -182,8 +205,14 @@ model User {
   chatParticipants         ChatParticipant[]
   messages                 Message[]
   messageReads             MessageRead[]
-  punchLog PunchLog[]
+  punchLog   PunchLog[]
   aiChatLogs AiChatLog[]
+
+  employeeSalaries EmployeeSalary[]
+  attendances      Attendance[]
+  salarySlips      SalarySlip[]
+  adjustments      SalaryAdjustment[]
+  loans            Loan[]
 
   @@unique([companyId, empCode])
   @@unique([companyId, uanNumber])
@@ -499,4 +528,250 @@ model AiChatLog {
 
   @@index([companyId])
   @@index([companyId, createdAt])
+}
+
+//////////////////////////////////////////////////////
+// SALARY TEMPLATE (REUSABLE)
+//////////////////////////////////////////////////////
+
+model SalaryTemplate {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  components       TemplateComponent[]
+  employeeSalaries EmployeeSalary[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+model TemplateComponent {
+  id Int @id @default(autoincrement())
+
+  templateId Int
+  template   SalaryTemplate @relation(fields: [templateId], references: [id])
+
+  name String
+
+  componentType ComponentType
+  valueType     ValueType
+  value         Float
+
+  order Int?
+
+  @@unique([templateId, name])
+  @@index([templateId])
+}
+
+//////////////////////////////////////////////////////
+// EMPLOYEE SALARY (HISTORY ENABLED 🔥)
+//////////////////////////////////////////////////////
+
+model EmployeeSalary {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  templateId Int?
+  template   SalaryTemplate? @relation(fields: [templateId], references: [id])
+
+  salaryMode SalaryMode
+
+  baseSalary Float
+
+  workingDaysPerMonth Int?
+  workingHoursPerDay  Int?
+
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+
+  isActive Boolean @default(true)
+
+  components SalaryComponent[]
+  slips      SalarySlip[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, effectiveFrom, effectiveTo])
+  @@index([companyId])
+}
+
+//////////////////////////////////////////////////////
+// SALARY COMPONENT (PER EMPLOYEE)
+//////////////////////////////////////////////////////
+
+model SalaryComponent {
+  id Int @id @default(autoincrement())
+
+  salaryId Int
+  salary   EmployeeSalary @relation(fields: [salaryId], references: [id])
+
+  name String
+
+  componentType ComponentType
+  valueType     ValueType
+
+  value Float
+
+  order Int?
+
+  createdAt DateTime @default(now())
+
+  @@unique([salaryId, name])
+  @@index([salaryId])
+}
+
+//////////////////////////////////////////////////////
+// ATTENDANCE / WORK LOG (CORE 🔥)
+//////////////////////////////////////////////////////
+
+model Attendance {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  date DateTime
+
+  isPresent Boolean @default(true)
+
+  hoursWorked   Float? // for hourly
+  overtimeHours Float? // optional
+
+  @@unique([userId, date])
+  @@index([companyId])
+}
+
+//////////////////////////////////////////////////////
+// SALARY SLIP (FINAL OUTPUT 🔒)
+//////////////////////////////////////////////////////
+
+model SalarySlip {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  salaryId Int
+  salary   EmployeeSalary @relation(fields: [salaryId], references: [id])
+
+  month Int
+  year  Int
+
+  grossAmount    Float
+  totalDeduction Float
+  netPay         Float
+
+  generatedAt DateTime @default(now())
+
+  components SalarySlipComponent[]
+  repayments LoanRepayment[]
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, month, year])
+  @@index([companyId])
+}
+
+//////////////////////////////////////////////////////
+// SALARY SLIP COMPONENT SNAPSHOT 🔒
+//////////////////////////////////////////////////////
+
+model SalarySlipComponent {
+  id Int @id @default(autoincrement())
+
+  salarySlipId Int
+  salarySlip   SalarySlip @relation(fields: [salarySlipId], references: [id])
+
+  name String
+
+  componentType ComponentType
+  valueType     ValueType
+
+  value  Float
+  amount Float
+
+  @@index([salarySlipId])
+}
+
+model SalaryAdjustment {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  componentType ComponentType
+  amount        Float
+
+  month Int
+  year  Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, month, year])
+}
+
+//////////////////////////////////////////////////////
+// LOAN MANAGEMENT
+//////////////////////////////////////////////////////
+
+model Loan {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  principalAmount Float
+  interestRate    Float // percentage
+  tenureMonths    Int
+
+  emiAmount      Float
+  totalRepayable Float
+
+  remainingAmount Float
+  status          String @default("ACTIVE") // ACTIVE | COMPLETED | CANCELLED
+
+  disbursedAt DateTime @default(now())
+
+  repayments LoanRepayment[]
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+model LoanRepayment {
+  id Int @id @default(autoincrement())
+
+  loanId Int
+  loan   Loan @relation(fields: [loanId], references: [id])
+
+  salarySlipId Int?
+  salarySlip   SalarySlip? @relation(fields: [salarySlipId], references: [id])
+
+  amount Float
+  paidAt DateTime @default(now())
+
+  @@index([loanId])
 }

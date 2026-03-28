@@ -19,5 +19,6 @@ router.use('/subscription', require('./subscription'));
 router.use('/hierarchy', require('./hierarchy'));
 
 router.use("/ai", require("./ai"));
+router.use("/salary", require("./salary.route"));
 
 module.exports = router;
