@@ -10,6 +10,7 @@ const {
   generateSlipSchema,
   getLoansSchema,
   getLoanStatsSchema,
+  loanActionSchema,
 } = require("../validation/salary.validation");
 
 const router = express.Router();
@@ -33,6 +34,8 @@ router.route("/history/:userId")
 router.route("/loans")
   .post(validate(createLoanSchema), salaryController.createLoan)
   .get(validate(getLoansSchema), salaryController.getLoans);
+
+router.post("/loans/:id/action", validate(loanActionSchema), salaryController.handleLoanAction);
 
 router.get("/loan-stats", validate(getLoanStatsSchema), salaryController.getLoanStats);
 

@@ -42,6 +42,7 @@ const createLoanSchema = Joi.object({
   interestRate: Joi.number().min(0).required(),
   tenureMonths: Joi.number().integer().positive().required(),
   disbursedAt: Joi.date().optional(),
+  olderLoanId: Joi.number().integer().optional(),
 });
 
 const addAdjustmentSchema = Joi.object({
@@ -71,6 +72,15 @@ const getLoanStatsSchema = Joi.object({
   year: Joi.number().integer().min(2000).required(),
 });
 
+const loanActionSchema = Joi.object({
+  action: Joi.string().valid("PRE_CLOSE", "HOLD", "RESUME", "PARTIAL_PAYMENT").required(),
+  amount: Joi.number().positive().when("action", {
+    is: "PARTIAL_PAYMENT",
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+});
+
 module.exports = {
   salaryTemplateSchema,
   assignSalarySchema,
@@ -79,4 +89,5 @@ module.exports = {
   generateSlipSchema,
   getLoansSchema,
   getLoanStatsSchema,
+  loanActionSchema,
 };

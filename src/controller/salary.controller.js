@@ -53,6 +53,12 @@ class SalaryController {
     res.status(200).json(result);
   });
 
+  handleLoanAction = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const loan = await salaryService.processLoanAction(id, req.body);
+    res.status(200).json({ status: "success", data: loan });
+  });
+
   // Adjustments
   addAdjustment = catchAsync(async (req, res) => {
     const { userId } = req.body;

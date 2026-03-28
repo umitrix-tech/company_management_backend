@@ -746,13 +746,13 @@ model Loan {
   principalAmount Float
   interestRate    Float // percentage
   tenureMonths    Int
+  olderPaymentId  Int? 
 
   emiAmount      Float
   totalRepayable Float
 
   remainingAmount Float
-  status          String @default("ACTIVE") // ACTIVE | COMPLETED | CANCELLED
-
+  status          String @default("ACTIVE") 
   disbursedAt DateTime @default(now())
 
   repayments LoanRepayment[]

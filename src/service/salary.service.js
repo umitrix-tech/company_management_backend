@@ -156,7 +156,27 @@ class SalaryService {
    * LOANS
    */
   async createLoan(companyId, userId, data) {
-    const { principalAmount, interestRate, tenureMonths, disbursedAt } = data;
+    const { principalAmount, interestRate, tenureMonths, disbursedAt, olderLoanId } = data;
+
+    // If there's an older loan to close
+    if (olderLoanId) {
+      const oldLoan = await prisma.loan.findUnique({ where: { id: Number(olderLoanId) } });
+      if (oldLoan && oldLoan.status !== "COMPLETED") {
+          await prisma.loanRepayment.create({
+            data: {
+              loan: { connect: { id: oldLoan.id } },
+              amount: oldLoan.remainingAmount,
+            },
+          });
+          await prisma.loan.update({
+            where: { id: oldLoan.id },
+            data: {
+              remainingAmount: 0,
+              status: "COMPLETED",
+            },
+          });
+      }
+    }
 
     const monthlyRate = interestRate / 12 / 100;
     const emiAmount =
@@ -172,6 +192,7 @@ class SalaryService {
         principalAmount,
         interestRate,
         tenureMonths,
+        olderPaymentId: olderLoanId ? Number(olderLoanId) : null,
         emiAmount: Math.round(emiAmount * 100) / 100,
         totalRepayable: Math.round(totalRepayable * 100) / 100,
         remainingAmount: Math.round(totalRepayable * 100) / 100,
@@ -275,6 +296,72 @@ class SalaryService {
       overallLoanCount: overallStats._count.id || 0,
       overallLoanPendingAmount: overallStats._sum.remainingAmount || 0,
     };
+  }
+
+  async processLoanAction(loanId, data) {
+    const { action, amount } = data;
+    const loan = await prisma.loan.findUnique({ where: { id: Number(loanId) } });
+    if (!loan) throw new AppError("Loan not found", 404);
+
+    let updatedLoan;
+
+    switch (action) {
+      case "PRE_CLOSE":
+        // Pay the full remaining amount
+        const preCloseAmount = loan.remainingAmount;
+        await prisma.loanRepayment.create({
+          data: {
+            loan: { connect: { id: loan.id } },
+            amount: preCloseAmount,
+          },
+        });
+        updatedLoan = await prisma.loan.update({
+          where: { id: loan.id },
+          data: {
+            remainingAmount: 0,
+            status: "COMPLETED",
+          },
+        });
+        break;
+
+      case "HOLD":
+        updatedLoan = await prisma.loan.update({
+          where: { id: loan.id },
+          data: { status: "HELD" },
+        });
+        break;
+
+      case "RESUME":
+        updatedLoan = await prisma.loan.update({
+          where: { id: loan.id },
+          data: { status: "ACTIVE" },
+        });
+        break;
+
+      case "PARTIAL_PAYMENT":
+        if (!amount || amount <= 0) throw new AppError("Valid amount is required for partial payment", 400);
+        const paymentAmount = Math.min(amount, loan.remainingAmount);
+        await prisma.loanRepayment.create({
+          data: {
+            loan: { connect: { id: loan.id } },
+            amount: paymentAmount,
+          },
+        });
+        const newRemaining = loan.remainingAmount - paymentAmount;
+        updatedLoan = await prisma.loan.update({
+          where: { id: loan.id },
+          data: {
+            remainingAmount: newRemaining,
+            status: newRemaining <= 0 ? "COMPLETED" : loan.status,
+          },
+        });
+        break;
+
+      default:
+        throw new AppError("Invalid loan action", 400);
+    }
+
+    return updatedLoan;
   }
 
   /**
@@ -461,8 +548,8 @@ class SalaryService {
     for (const rep of loanRepaymentsData) {
       await prisma.loanRepayment.create({
         data: {
-          loanId: rep.loanId,
-          salarySlipId: slip.id,
+          loan: { connect: { id: rep.loanId } },
+          salarySlip: { connect: { id: slip.id } },
           amount: rep.amount
         }
       });
