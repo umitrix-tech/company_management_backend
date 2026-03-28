@@ -6,9 +6,11 @@ const salaryTemplateSchema = Joi.object({
     .items(
       Joi.object({
         name: Joi.string().required(),
+        code: Joi.string().uppercase().allow(null, "").optional(),
         componentType: Joi.string().valid("EARNING", "DEDUCTION").required(),
         valueType: Joi.string().valid("FIXED", "PERCENTAGE").required(),
         value: Joi.number().required(),
+        formula: Joi.string().allow(null, "").optional(),
         order: Joi.number().integer().optional(),
       })
     )
@@ -27,9 +29,11 @@ const assignSalarySchema = Joi.object({
     .items(
       Joi.object({
         name: Joi.string().required(),
+        code: Joi.string().uppercase().allow(null, "").optional(),
         componentType: Joi.string().valid("EARNING", "DEDUCTION").required(),
         valueType: Joi.string().valid("FIXED", "PERCENTAGE").required(),
         value: Joi.number().required(),
+        formula: Joi.string().allow(null, "").optional(),
         order: Joi.number().integer().optional(),
       })
     )
@@ -61,6 +65,7 @@ const generateSlipSchema = Joi.object({
 });
 
 const getLoansSchema = Joi.object({
+  id:Joi.number().integer().min(1).optional(),
   month: Joi.number().integer().min(1).max(12).required(),
   year: Joi.number().integer().min(2000).required(),
   page: Joi.number().integer().min(1).optional(),

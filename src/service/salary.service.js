@@ -2,6 +2,20 @@ const prisma = require("../../prisma");
 const AppError = require("../utils/AppError");
 
 class SalaryService {
+  _evaluateFormula(formula, context) {
+    try {
+      const processedFormula = formula.replace(/[A-Z_][A-Z0-9_]*/g, (match) => {
+        if (context[match] !== undefined) return context[match];
+        if (typeof Math[match] === "function") return `Math.${match}`;
+        return 0;
+      });
+      return new Function(`return (${processedFormula})`)();
+    } catch (error) {
+      console.error(`Error evaluating formula "${formula}":`, error.message);
+      return 0;
+    }
+  }
+
   /**
    * SALARY TEMPLATES
    */
@@ -19,9 +33,11 @@ class SalaryService {
         data: components.map((c) => ({
           templateId: template.id,
           name: c.name,
+          code: c.code,
           componentType: c.componentType,
           valueType: c.valueType,
           value: c.value,
+          formula: c.formula,
           order: c.order,
         })),
       });
@@ -57,9 +73,11 @@ class SalaryService {
           components: {
             create: components.map((c) => ({
               name: c.name,
+              code: c.code,
               componentType: c.componentType,
               valueType: c.valueType,
               value: c.value,
+              formula: c.formula,
               order: c.order,
             })),
           },
@@ -130,9 +148,11 @@ class SalaryService {
         data: finalComponents.map((c) => ({
           salaryId: salary.id,
           name: c.name,
+          code: c.code,
           componentType: c.componentType,
           valueType: c.valueType,
           value: c.value,
+          formula: c.formula,
           order: c.order,
         })),
       });
@@ -208,10 +228,13 @@ class SalaryService {
   }
 
   async getLoans(companyId, query) {
-    const { month, year, page = 1, limit = 10 } = query;
+    const { month, year, page = 1, limit = 10, id = null } = query;
     const skip = (page - 1) * limit;
 
     const where = { companyId };
+    if(id){
+      where.id = Number(id);
+    }
     
     const [loans, total] = await Promise.all([
       prisma.loan.findMany({
@@ -489,25 +512,36 @@ class SalaryService {
       totalGross += periodBasePay;
       slipComponents.push({
         name: `Base Pay (${salary.salaryMode})`,
+        code: "BASE",
         componentType: "EARNING",
         valueType: "FIXED",
         value: salary.baseSalary,
-        amount: periodBasePay
+        amount: periodBasePay,
       });
 
-      for (const comp of salary.components) {
+      let context = { BASE: periodBasePay };
+
+      const sortedComponents = [...salary.components].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      for (const comp of sortedComponents) {
         let amount = 0;
-        if (comp.valueType === "FIXED") {
+        if (comp.formula) {
+          amount = this._evaluateFormula(comp.formula, context);
+        } else if (comp.valueType === "FIXED") {
           if (salary.salaryMode === "MONTHLY") {
             const daysInMonth = new Date(year, month, 0).getDate();
             const workingDays = salary.workingDaysPerMonth || daysInMonth;
             amount = (comp.value / workingDays) * presentDays;
           } else {
-             const daysInMonth = new Date(year, month, 0).getDate();
-             amount = (comp.value / daysInMonth) * daysInPeriod; 
+            const daysInMonth = new Date(year, month, 0).getDate();
+            amount = (comp.value / daysInMonth) * daysInPeriod;
           }
         } else if (comp.valueType === "PERCENTAGE") {
           amount = (periodBasePay * comp.value) / 100;
+        }
+
+        if (comp.code) {
+          context[comp.code] = amount;
         }
 
         if (comp.componentType === "EARNING") {
@@ -518,10 +552,12 @@ class SalaryService {
 
         slipComponents.push({
           name: comp.name,
+          code: comp.code,
+          formula: comp.formula,
           componentType: comp.componentType,
           valueType: comp.valueType,
           value: comp.value,
-          amount: amount
+          amount: amount,
         });
       }
     }
@@ -589,6 +625,8 @@ class SalaryService {
         data: slipComponents.map((c) => ({
           salarySlipId: slip.id,
           name: c.name,
+          code: c.code,
+          formula: c.formula,
           componentType: c.componentType,
           valueType: c.valueType,
           value: c.value,

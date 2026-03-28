@@ -557,10 +557,12 @@ model TemplateComponent {
   template   SalaryTemplate @relation(fields: [templateId], references: [id])
 
   name String
+  code String? // e.g. BASIC, HRA
 
   componentType ComponentType
   valueType     ValueType
   value         Float
+  formula       String?
 
   order Int?
 
@@ -617,11 +619,13 @@ model SalaryComponent {
   salary   EmployeeSalary @relation(fields: [salaryId], references: [id])
 
   name String
+  code String?
 
   componentType ComponentType
   valueType     ValueType
 
-  value Float
+  value   Float
+  formula String?
 
   order Int?
 
@@ -697,7 +701,9 @@ model SalarySlipComponent {
   salarySlipId Int
   salarySlip   SalarySlip @relation(fields: [salarySlipId], references: [id])
 
-  name String
+  name    String
+  code    String?
+  formula String?
 
   componentType ComponentType
   valueType     ValueType
