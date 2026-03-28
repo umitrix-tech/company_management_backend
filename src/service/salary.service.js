@@ -181,6 +181,102 @@ class SalaryService {
     });
   }
 
+  async getLoans(companyId, query) {
+    const { month, year, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    const where = { companyId };
+    
+    const [loans, total] = await Promise.all([
+      prisma.loan.findMany({
+        where,
+        include: {
+          user: {
+            select: { name: true, empCode: true }
+          },
+          repayments: {
+            where: {
+              salarySlip: {
+                month: Number(month),
+                year: Number(year)
+              }
+            }
+          }
+        },
+        skip,
+        take: Number(limit),
+        orderBy: { disbursedAt: "desc" }
+      }),
+      prisma.loan.count({ where })
+    ]);
+
+    // Format the response with status for the specific month
+    const formattedLoans = await Promise.all(loans.map(async (loan) => {
+      // Check if there's a salary slip for this user in this month to enable "slip download"
+      const slip = await prisma.salarySlip.findUnique({
+        where: {
+          userId_month_year: {
+            userId: loan.userId,
+            month: Number(month),
+            year: Number(year)
+          }
+        },
+        select: { id: true }
+      });
+
+      return {
+        id: loan.id,
+        name: loan.user.name,
+        empCode: loan.user.empCode,
+        loanStatus: loan.status, // ACTIVE / COMPLETED
+        monthStatus: loan.repayments.length > 0 ? "CLEARED" : "PENDING",
+        slipId: slip ? slip.id : null,
+        principalAmount: loan.principalAmount,
+        emiAmount: loan.emiAmount,
+        remainingAmount: loan.remainingAmount
+      };
+    }));
+
+    return {
+      data: formattedLoans,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async getLoanStats(companyId, month, year) {
+    // 1. Monthly collected amount
+    const monthlyRepayments = await prisma.loanRepayment.aggregate({
+      where: {
+        loan: { companyId },
+        salarySlip: { month: Number(month), year: Number(year) }
+      },
+      _sum: { amount: true }
+    });
+
+    // 2. Overall stats
+    const overallStats = await prisma.loan.aggregate({
+      where: { companyId },
+      _sum: {
+        totalRepayable: true,
+        remainingAmount: true
+      },
+      _count: { id: true }
+    });
+
+    return {
+      monthTotalLoanCollectAmount: monthlyRepayments._sum.amount || 0,
+      pendingAmount: overallStats._sum.remainingAmount || 0,
+      overallLoanAmount: overallStats._sum.totalRepayable || 0,
+      overallLoanCount: overallStats._count.id || 0,
+      overallLoanPendingAmount: overallStats._sum.remainingAmount || 0,
+    };
+  }
+
   /**
    * ADJUSTMENTS
    */

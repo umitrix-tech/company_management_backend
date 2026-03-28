@@ -59,10 +59,24 @@ const generateSlipSchema = Joi.object({
   year: Joi.number().integer().min(2000).required(),
 });
 
+const getLoansSchema = Joi.object({
+  month: Joi.number().integer().min(1).max(12).required(),
+  year: Joi.number().integer().min(2000).required(),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).optional(),
+});
+
+const getLoanStatsSchema = Joi.object({
+  month: Joi.number().integer().min(1).max(12).required(),
+  year: Joi.number().integer().min(2000).required(),
+});
+
 module.exports = {
   salaryTemplateSchema,
   assignSalarySchema,
   createLoanSchema,
   addAdjustmentSchema,
   generateSlipSchema,
+  getLoansSchema,
+  getLoanStatsSchema,
 };

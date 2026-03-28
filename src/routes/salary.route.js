@@ -8,6 +8,8 @@ const {
   createLoanSchema,
   addAdjustmentSchema,
   generateSlipSchema,
+  getLoansSchema,
+  getLoanStatsSchema,
 } = require("../validation/salary.validation");
 
 const router = express.Router();
@@ -29,7 +31,10 @@ router.route("/history/:userId")
   .get(salaryController.getSalaryHistory);
 
 router.route("/loans")
-  .post(validate(createLoanSchema), salaryController.createLoan);
+  .post(validate(createLoanSchema), salaryController.createLoan)
+  .get(validate(getLoansSchema), salaryController.getLoans);
+
+router.get("/loan-stats", validate(getLoanStatsSchema), salaryController.getLoanStats);
 
 router.route("/adjustments")
   .post(validate(addAdjustmentSchema), salaryController.addAdjustment);

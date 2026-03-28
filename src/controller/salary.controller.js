@@ -42,6 +42,17 @@ class SalaryController {
     res.status(201).json({ status: "success", data: loan });
   });
 
+  getLoans = catchAsync(async (req, res) => {
+    const result = await salaryService.getLoans(req.user.companyId, req.query);
+    res.status(200).json(result);
+  });
+
+  getLoanStats = catchAsync(async (req, res) => {
+    const { month, year } = req.query;
+    const result = await salaryService.getLoanStats(req.user.companyId, month, year);
+    res.status(200).json(result);
+  });
+
   // Adjustments
   addAdjustment = catchAsync(async (req, res) => {
     const { userId } = req.body;
