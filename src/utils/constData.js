@@ -5,6 +5,10 @@ let moduleObj = {
         CHARTS: "dashboard_charts",
         WIDGETS: "dashboard_widgets"
     },
+    CALL:{
+        MODULE:"call_module",
+        VIEW:"call_view",
+    },
     EMPLOYEE: {
         MODULE: "employee_module",
         VIEW: "employee_view",
@@ -283,6 +287,18 @@ let screenList = [
             }
         ]
     },
+    {
+        "key": moduleObj.CALL.MODULE,
+        "label": "Call",
+        "access": false,
+        "children":[
+            {
+                "key": moduleObj.CALL.VIEW,
+                "label": "View Call",
+                "access": false
+            }
+        ]
+    }
 ];
 
 module.exports = {
