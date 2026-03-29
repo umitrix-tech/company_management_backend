@@ -188,6 +188,8 @@ model User {
   isDetele        Boolean    @default(false)
   status          UserStates @default(ACTIVE)
   backEndStatus   String?
+  logoUrl         String?
+  backgroundUrl   String?   @default("https://pub-3ea8ee54beac4fd0807ffb8e21903f9d.r2.dev/media/1774767921529-pngtree-painting-of-a-contemporary-building-construction-site-on-white-background-including-image_15883562.jpg")
   documets        String[]   @default([])
 
   createdAt DateTime @default(now())
