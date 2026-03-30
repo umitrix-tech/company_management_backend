@@ -8,6 +8,9 @@ let moduleObj = {
     CALL:{
         MODULE:"call_module",
         VIEW:"call_view",
+        TEAM_CALL:"team_call",
+        CUSTOMER_CALL:"customer_call",
+        // SPECTATING_CALL:"spectating_call"
     },
     EMPLOYEE: {
         MODULE: "employee_module",
@@ -296,6 +299,21 @@ let screenList = [
                 "key": moduleObj.CALL.VIEW,
                 "label": "View Call",
                 "access": false
+            },
+            {
+                "key":moduleObj.CALL.TEAM_CALL,
+                "label": "Team Call",
+                "access":false
+            },
+            {
+                "key":moduleObj.CALL.CUSTOMER_CALL,
+                "label": "Customer Call",
+                "access":false
+            },
+            {
+                "key":moduleObj.CALL.SPECTATING_CALL,
+                "label": "Spectating Call",
+                "access":false
             }
         ]
     }
@@ -305,12 +323,10 @@ module.exports = {
     ROLE_OWNER: "Owner",
     ROLE_CUSTOMER:"Customer",
     TEMP_PASSWORD: "Test@123",
-
     USER_BACKEND_STATUS:{
         "only_login":"only_login",
         "company_created":"company_created",
     },
-
     //Role info
     moduleAccess: moduleObj,
     screenRoleInfo: screenList
