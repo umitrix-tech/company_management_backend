@@ -46,6 +46,8 @@ const updateUserSchemaValidation = Joi.object({
     documets: Joi.array().items(Joi.string().trim()),
     roleId: Joi.number().integer().positive(),
     WorkHoursConfigurationId: Joi.number().integer().positive().optional(),
+      logoUrl:Joi.string().optional(),
+    backgroundUrl:Joi.string().optional()
 
 })
     .min(1);
