@@ -63,22 +63,22 @@ const infoService = async (req, user) => {
 
     if (isOauth) {
       const userInfo = await prisma.user.findFirst
-      ({
-        where:{
-          id:parseInt(id)
-        },
-        include:{
-          role:true
-        },
-        omit:{
-          password:true,
-          isDetele:true,
-          updatedAt:true,
-          createdAt:true,
-        }
-      }) 
-      
-      if(!userInfo){
+        ({
+          where: {
+            id: parseInt(id)
+          },
+          include: {
+            role: true
+          },
+          omit: {
+            password: true,
+            isDetele: true,
+            updatedAt: true,
+            createdAt: true,
+          }
+        })
+
+      if (!userInfo) {
         throw new AppError("Invalid user", 401);
       }
 
@@ -102,19 +102,38 @@ const infoService = async (req, user) => {
     }
 
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
-    const ownuserInfo = await prisma.user.findUnique({ where: { id: parseInt(id), companyId: parseInt(companyId) } });
+    const ownuserInfo = await prisma.user.findUnique({ where: { id: parseInt(id), companyId: parseInt(companyId) } })
 
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const punchInfo = await prisma.punchLog.findFirst({
+      where: {
+        userId: parseInt(id),
+        companyId: parseInt(companyId),
+        punchIn: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      orderBy: {
+        punchIn: 'desc',
+      },
+    });
     delete ownuserInfo.password;
     delete ownuserInfo.updatedAt;
     delete ownuserInfo.isDetele
 
     return {
-      user: ownuserInfo, roleInfo,
+      user: { ...ownuserInfo, punchInfo: punchInfo ? punchInfo : null }, roleInfo,
       plan,
-      companyInfo
+      companyInfo,
     };
   } catch (error) {
-    
+
     throw catchAsyncPrismaError(error)
   }
 }
@@ -182,42 +201,42 @@ const forgotPasswordOtpService = async ({ email }) => {
 }
 
 
-const passwordChangeService = async(payload, user) => {
+const passwordChangeService = async (payload, user) => {
 
- try {
-  console.log(user);
-  
-     const {companyId, id} = user;
-  const {password} = payload
+  try {
+    console.log(user);
 
-  const userInfo = await prisma.user.findUnique({
-    where:{
-      id:parseInt(id),
-      companyId:parseInt(companyId)
+    const { companyId, id } = user;
+    const { password } = payload
+
+    const userInfo = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+        companyId: parseInt(companyId)
+      }
+    })
+
+    if (!userInfo) {
+      throw new AppError("User is not found , check you admin team", 403);
     }
-  })
 
-  if (!userInfo) {
-    throw new AppError("User is not found , check you admin team", 403);
+    const Convertedpassword = await bcrypt.hash(password, 10);
+
+
+    return await prisma.user.update({
+      where: {
+        id: parseInt(id),
+        companyId: parseInt(companyId)
+      },
+      data: {
+        ...userInfo,
+        password: Convertedpassword
+      }
+    })
+
+  } catch (error) {
+    throw catchAsyncPrismaError(error)
   }
-
-  const Convertedpassword = await bcrypt.hash(password, 10);
-
-
-  return await prisma.user.update({
-   where:{
-       id:parseInt(id),
-      companyId:parseInt(companyId)
-    },
-    data:{
-      ...userInfo,
-      password:Convertedpassword
-    }
-  })
-
- } catch (error) {
-  throw catchAsyncPrismaError(error)  
- }
 
 }
 
@@ -249,25 +268,25 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
       where: { id: otpEntry.id },
       data: { isVerified: true, expiresAt: new Date() },
     });
-    const isExistUser = await prisma.user.findUnique({ where: { email }, include:{role:true} });
+    const isExistUser = await prisma.user.findUnique({ where: { email }, include: { role: true } });
 
     if (isExistUser) {
 
-          const token = jwt.sign(
-      { id: isExistUser.id, email: isExistUser.email, role: isExistUser.role?.name, roleId: isExistUser.role?.id, companyId: isExistUser.companyId, deviceId: deviceId,},
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRE_TIME,
-      }
-    );
+      const token = jwt.sign(
+        { id: isExistUser.id, email: isExistUser.email, role: isExistUser.role?.name, roleId: isExistUser.role?.id, companyId: isExistUser.companyId, deviceId: deviceId, },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_EXPIRE_TIME,
+        }
+      );
       responce = {
         ...responce,
         newUser: false,
         token
-        
+
       }
 
-   
+
 
       return responce;
     }
@@ -280,12 +299,12 @@ const verifyOtpService = async ({ email, otp, deviceId = "", isCustomer = false 
         name: email.split("@")[0],
         password,
         empCode: Date.now().toString(),
-        backEndStatus:USER_BACKEND_STATUS.only_login
+        backEndStatus: USER_BACKEND_STATUS.only_login
       },
     });
 
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, role:isCustomer ? ROLE_CUSTOMER :  ROLE_OWNER, companyId: newUser.companyId, deviceId },
+      { id: newUser.id, email: newUser.email, role: isCustomer ? ROLE_CUSTOMER : ROLE_OWNER, companyId: newUser.companyId, deviceId },
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRE_TIME,

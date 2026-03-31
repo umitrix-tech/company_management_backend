@@ -120,6 +120,7 @@ model Company {
   gallery                Gallery[]
   notes                  Notes[]
   aiChatLogs             AiChatLog[]
+  CallHistory            CallHistory[]
 
   salaryTemplates   SalaryTemplate[]
   employeeSalaries  EmployeeSalary[]
@@ -127,6 +128,7 @@ model Company {
   attendances       Attendance[]
   salaryAdjustments SalaryAdjustment[]
   loans             Loan[]
+  Review            Review[]
 }
 
 model RolePermission {
@@ -209,12 +211,17 @@ model User {
   messageReads             MessageRead[]
   punchLog   PunchLog[]
   aiChatLogs AiChatLog[]
+  callsMade CallHistory[] @relation("Caller")
+  callsReceived CallHistory[] @relation("Receiver")
+  Review        Review[]
+
 
   employeeSalaries EmployeeSalary[]
   attendances      Attendance[]
   salarySlips      SalarySlip[]
   adjustments      SalaryAdjustment[]
   loans            Loan[]
+
 
   @@unique([companyId, empCode])
   @@unique([companyId, uanNumber])
@@ -411,6 +418,9 @@ model Customer {
   company      Company           @relation(fields: [companyId], references: [id])
   participants ChatParticipant[]
   messages     Message[]
+  CallHistory  CallHistory[]
+  Review       Review[]
+
 
   @@index([companyId])
 }
@@ -532,9 +542,25 @@ model AiChatLog {
   @@index([companyId, createdAt])
 }
 
-//////////////////////////////////////////////////////
-// SALARY TEMPLATE (REUSABLE)
-//////////////////////////////////////////////////////
+model Attendance {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  date DateTime
+
+  isPresent Boolean @default(true)
+
+  hoursWorked   Float? // for hourly
+  overtimeHours Float? // optional
+
+  @@unique([userId, date])
+  @@index([companyId])
+}
 
 model SalaryTemplate {
   id   Int    @id @default(autoincrement())
@@ -637,33 +663,8 @@ model SalaryComponent {
   @@index([salaryId])
 }
 
-//////////////////////////////////////////////////////
-// ATTENDANCE / WORK LOG (CORE 🔥)
-//////////////////////////////////////////////////////
 
-model Attendance {
-  id Int @id @default(autoincrement())
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id])
-
-  date DateTime
-
-  isPresent Boolean @default(true)
-
-  hoursWorked   Float? // for hourly
-  overtimeHours Float? // optional
-
-  @@unique([userId, date])
-  @@index([companyId])
-}
-
-//////////////////////////////////////////////////////
-// SALARY SLIP (FINAL OUTPUT 🔒)
-//////////////////////////////////////////////////////
 
 model SalarySlip {
   id Int @id @default(autoincrement())
@@ -692,10 +693,6 @@ model SalarySlip {
   @@unique([userId, month, year])
   @@index([companyId])
 }
-
-//////////////////////////////////////////////////////
-// SALARY SLIP COMPONENT SNAPSHOT 🔒
-//////////////////////////////////////////////////////
 
 model SalarySlipComponent {
   id Int @id @default(autoincrement())
@@ -738,9 +735,6 @@ model SalaryAdjustment {
   @@index([userId, month, year])
 }
 
-//////////////////////////////////////////////////////
-// LOAN MANAGEMENT
-//////////////////////////////////////////////////////
 
 model Loan {
   id Int @id @default(autoincrement())
@@ -782,4 +776,65 @@ model LoanRepayment {
   paidAt DateTime @default(now())
 
   @@index([loanId])
+}
+
+enum CallStatus {
+  PENDING
+  COMPLETED
+  ONGOING
+  CANCELLED
+}
+
+
+enum CallType {
+  CUSTOMER
+  INTERNAL
+}
+
+model CallHistory {
+  id Int @id @default(autoincrement())
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  callerId Int
+  caller   User @relation("Caller", fields: [callerId], references: [id])
+
+  receiverId Int
+  receiver   User @relation("Receiver", fields: [receiverId], references: [id])
+
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+    
+  callType CallType
+  callStatus CallStatus
+  callDuration Float?
+  waitingDuration Float?
+  roomId String? @unique
+  callConnectedAt  DateTime?
+
+  review   Review?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id Int @id @default(autoincrement())
+  rating Int
+  comment String?
+  
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+  
+  callId Int @unique
+  call   CallHistory @relation(fields: [callId], references: [id])
+  
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
 }

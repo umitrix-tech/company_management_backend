@@ -253,9 +253,18 @@ const listPunchLogService = async (query, user) => {
     let userId = user.id;
 
     const dateFilter = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
 
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      dateFilter.gte = start;
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
+    }
     const where = {
       companyId: user.companyId,
       ...(userId && { userId: Number(userId) }),
@@ -268,6 +277,8 @@ const listPunchLogService = async (query, user) => {
         orderBy: { punchIn: "desc" },
       }),
     ]);
+    console.log(data, 'data');
+
 
     // --- Group by date ---
     const formatDateKey = (date) => {
@@ -411,10 +422,10 @@ const employeeAttendanceDashboardService = async (query, user) => {
     const date = query.date ? new Date(query.date) : new Date();
 
     const start = new Date(date);
-    start.setHours(0,0,0,0);
+    start.setHours(0, 0, 0, 0);
 
     const end = new Date(date);
-    end.setHours(23,59,59,999);
+    end.setHours(23, 59, 59, 999);
 
     const companyId = user.companyId;
 
@@ -459,7 +470,7 @@ const employeeAttendanceDashboardService = async (query, user) => {
         webSet.add(log.userId);
       }
 
-      if (log.puchVia === PunchSource.MOBILE  || log.puchVia === PunchSource.WEB) {
+      if (log.puchVia === PunchSource.MOBILE || log.puchVia === PunchSource.WEB) {
         mobileSet.add(log.userId);
       }
 
@@ -516,8 +527,8 @@ const particularEmployeeAttendanceService = async (query, user) => {
     };
 
 
-    console.log(where,'where');
-    
+    console.log(where, 'where');
+
     const data = await prisma.punchLog.findMany({
       where,
       orderBy: { punchIn: "desc" },

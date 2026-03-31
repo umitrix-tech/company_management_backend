@@ -9,8 +9,8 @@ router.use('/role', require('./role'));
 router.use('/config', require('./configuration'));
 router.use('/particularDateConfig', require('./particularDateConfig'));
 router.use('/punchLog', require('./punchLog.route'));
-router.use('/timeline',require('./timeLineConfig'));
-router.use('/policy',require('./policy'));
+router.use('/timeline', require('./timeLineConfig'));
+router.use('/policy', require('./policy'));
 router.use("/media", require("./media"));
 router.use('/notes', require('./notes'));
 router.use('/gallery', require('./gallery'));
@@ -20,5 +20,7 @@ router.use('/hierarchy', require('./hierarchy'));
 
 router.use("/ai", require("./ai"));
 router.use("/salary", require("./salary.route"));
+router.use("/call", require("./call.route"));
+router.use("/dashboard", require("./dashboard.route"));
 
 module.exports = router;
