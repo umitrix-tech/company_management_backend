@@ -10,7 +10,7 @@ let moduleObj = {
         VIEW:"call_view",
         TEAM_CALL:"team_call",
         CUSTOMER_CALL:"customer_call",
-        // SPECTATING_CALL:"spectating_call"
+        SPECTATING_CALL:"spectating_call"
     },
     EMPLOYEE: {
         MODULE: "employee_module",

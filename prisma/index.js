@@ -1,27 +1,16 @@
-
 const { PrismaClient } = require("@prisma/client");
-const { withAccelerate } = require("@prisma/extension-accelerate");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { Pool } = require("pg");
 require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 10,                
+  connectionString: process.env.DATABASE_URL, // Standard postgresql:// URL
+  max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
-
 const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter }).$extends(withAccelerate());
+const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;
-
-// const { PrismaClient } = require("@prisma/client");
-
-// const prisma = new PrismaClient({
-//   accelerateUrl: process.env.ACCELERATE_KEY
-// }).$extends(withAccelerate());
-
-// module.exports = prisma;
