@@ -163,6 +163,10 @@ model Role {
   company        Company          @relation(fields: [companyId], references: [id])
   RolePermission RolePermission[]
 
+  
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
   @@index([companyId])
 }
 

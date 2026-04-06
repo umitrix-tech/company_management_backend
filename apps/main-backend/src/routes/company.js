@@ -16,13 +16,13 @@ router.post(
 
 router.get(
   '/',
-  permissonAuth(moduleAccess.COMPANY_INFO.MODULE),
+  permissonAuth(moduleAccess.COMPANY.MODULE),
   companyDetaillController
 );
 
 router.put(
   '/update',
-  permissonAuth(moduleAccess.COMPANY_INFO.EDIT_COMPANY),
+  permissonAuth(moduleAccess.COMPANY.UPDATE),
   validate(updateCompanySchema),
   companyUpdateController
 )
