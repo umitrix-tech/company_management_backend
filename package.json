@@ -12,9 +12,14 @@
     "dev:signal": "npm run dev -w apps/signal-service",
     "start:backend": "npm run start -w apps/main-backend",
     "start:signal": "npm run start -w apps/signal-service",
-    "install:all": "npm install"
+    "install:all": "npm install",
+    "prisma:generate": "npx prisma generate --schema packages/database/prisma/schema.prisma",
+    "prisma:push": "npx prisma db push --schema packages/database/prisma/schema.prisma"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
+  },
+  "prisma": {
+    "schema": "packages/database/prisma/schema.prisma"
   }
 }
