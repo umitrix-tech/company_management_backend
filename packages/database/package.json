@@ -1,0 +1,17 @@
+{
+  "name": "@umitrix/database",
+  "version": "1.0.0",
+  "description": "Shared Database Resource (Prisma)",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.2.0"
+  }
+}

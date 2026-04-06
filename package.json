@@ -1,45 +1,20 @@
 {
   "name": "company_management_backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Monorepo root for Company Management",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
-    "start": "node index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.980.0",
-    "@prisma/adapter-pg": "^7.1.0",
-    "@prisma/client": "^7.2.0",
-    "@prisma/extension-accelerate": "^3.0.1",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "exceljs": "^4.4.0",
-    "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "helmet": "^8.1.0",
-    "https": "^1.0.0",
-    "joi": "^18.0.2",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.0.2",
-    "node-cron": "^4.2.1",
-    "nodemailer": "^7.0.11",
-    "openai": "^6.32.0",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "pg": "^8.16.3",
-    "sib-api-v3-sdk": "^8.5.0",
-    "winston": "^3.19.0",
-    "ws": "^8.18.3"
+    "dev:backend": "npm run dev -w apps/main-backend",
+    "dev:signal": "npm run dev -w apps/signal-service",
+    "start:backend": "npm run start -w apps/main-backend",
+    "start:signal": "npm run start -w apps/signal-service",
+    "install:all": "npm install"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
-    "nodemon": "^3.1.11",
-    "prisma": "^7.2.0"
+    "nodemon": "^3.1.11"
   }
 }
