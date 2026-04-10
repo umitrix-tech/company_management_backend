@@ -107,7 +107,6 @@ model Company {
   PunchLog               PunchLog[]
   WorkHoursConfiguration WorkHoursConfiguration[]
   particularDateConfigs  ParticularDateConfig[]
-  salaryDesigns          SalaryDesign[]
   roles                  Role[]
   planHistories          PlanHistory[]
   companyGalleries       CompanyGallery[]
@@ -121,6 +120,12 @@ model Company {
   notes                  Notes[]
   aiChatLogs             AiChatLog[]
   CallHistory            CallHistory[]
+  PayrollCycle PayrollCycle[]
+  SalaryHistory SalaryHistory[]
+  PayrollRun PayrollRun[]
+  TaxSlab TaxSlab[]
+  EmployeeTaxConfig EmployeeTaxConfig[]
+  UserWorkConfigHistory UserWorkConfigHistory[]
 
   salaryTemplates   SalaryTemplate[]
   employeeSalaries  EmployeeSalary[]
@@ -201,7 +206,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  WorkHoursConfigurationId Int?
+  // WorkHoursConfigurationId Int?
   companyId                Int?
   company                  Company?          @relation(fields: [companyId], references: [id])
   role                     Role?             @relation(fields: [roleId], references: [id])
@@ -218,13 +223,15 @@ model User {
   callsMade CallHistory[] @relation("Caller")
   callsReceived CallHistory[] @relation("Receiver")
   Review        Review[]
-
-
   employeeSalaries EmployeeSalary[]
+  
+  employeeTaxConfigs EmployeeTaxConfig[]
+  UserWorkConfigHistory UserWorkConfigHistory[]
   attendances      Attendance[]
   salarySlips      SalarySlip[]
   adjustments      SalaryAdjustment[]
   loans            Loan[]
+  SalaryHistory SalaryHistory[]
 
 
   @@unique([companyId, empCode])
@@ -274,6 +281,7 @@ model BankDetails {
 
 model WorkHoursConfiguration {
   id                        Int            @id @default(autoincrement())
+  name                      String?
   workHoursModal            workHoursModal @default(GENERAL_TIME_COVER)
   startTime                 String         @default("10:00")
   endTime                   String         @default("17:00")
@@ -282,11 +290,39 @@ model WorkHoursConfiguration {
   shiftTimes                String[]       @default([])
   weeklyOffDays             Int[]          @default([6, 7])
 
+  isActive Boolean @default(true) 
+  version Int @default(1) 
+
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
 
+  UserWorkConfigHistory UserWorkConfigHistory[]
+
   @@index([companyId])
 }
+
+
+model UserWorkConfigHistory {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  workConfigId Int
+  workHoursConfiguration   WorkHoursConfiguration @relation(fields: [workConfigId], references: [id])
+
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, effectiveFrom])
+  @@index([userId, companyId])
+}
+
 
 model ParticularDateConfig {
   id          Int      @id @default(autoincrement())
@@ -322,44 +358,14 @@ model PunchLog {
   punchOut  DateTime?
   remarks   PunchLogType
   updatedBy Int
-    punchSource PunchSource @default(WEB)
+  punchSource PunchSource @default(WEB)
   companyId Int
-
+  
   company   Company      @relation(fields: [companyId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
 
-
   @@index([userId])
   @@index([companyId])
-}
-
-model SalaryDesign {
-  id Int @id @default(autoincrement())
-
-  components Json?
-  formulas   Json?
-
-  gross_vite_Amount    Float
-  total_vite_Deduction Float
-  net_vite_Pay         Float
-
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // @@index([employeeId])
-  @@index([companyId])
-}
-
-model attendanceDesignModal {
-  id Int @id @default(autoincrement())
-
-  // totalWorkingday
-  // totalPresntda
-  // totalHoursWorked  
-  // 
 }
 
 model timeLine {
@@ -546,6 +552,32 @@ model AiChatLog {
   @@index([companyId, createdAt])
 }
 
+enum AttendanceStatus {
+  ENTRY
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LEAVE
+}
+
+enum PayrollStatus {
+  OPEN
+  PROCESSING
+  COMPLETED
+  LOCKED
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  FINALIZED
+}
+
+enum SalaryChangeType {
+  HIKE
+  PROMOTION
+  CORRECTION
+}
+
 model Attendance {
   id Int @id @default(autoincrement())
 
@@ -559,11 +591,13 @@ model Attendance {
 
   isPresent Boolean @default(true)
 
+  status AttendanceStatus  @default(ABSENT)
+
   hoursWorked   Float? // for hourly
   overtimeHours Float? // optional
 
-  @@unique([userId, date])
-  @@index([companyId])
+  @@unique([userId, companyId, date])
+  @@index([companyId, date])
 }
 
 model SalaryTemplate {
@@ -602,10 +636,6 @@ model TemplateComponent {
   @@index([templateId])
 }
 
-//////////////////////////////////////////////////////
-// EMPLOYEE SALARY (HISTORY ENABLED 🔥)
-//////////////////////////////////////////////////////
-
 model EmployeeSalary {
   id Int @id @default(autoincrement())
 
@@ -620,10 +650,10 @@ model EmployeeSalary {
 
   salaryMode SalaryMode
 
-  baseSalary Float
+  baseSalary Decimal @db.Decimal(12,2)
 
-  workingDaysPerMonth Int?
-  workingHoursPerDay  Int?
+  // workingDaysPerMonth Int?
+  // workingHoursPerDay  Int?
 
   effectiveFrom DateTime
   effectiveTo   DateTime?
@@ -640,10 +670,6 @@ model EmployeeSalary {
   @@index([companyId])
 }
 
-//////////////////////////////////////////////////////
-// SALARY COMPONENT (PER EMPLOYEE)
-//////////////////////////////////////////////////////
-
 model SalaryComponent {
   id Int @id @default(autoincrement())
 
@@ -655,8 +681,9 @@ model SalaryComponent {
 
   componentType ComponentType
   valueType     ValueType
+  isTaxable Boolean @default(true)
 
-  value   Float
+  value   Decimal @db.Decimal(12,2)
   formula String?
 
   order Int?
@@ -667,8 +694,85 @@ model SalaryComponent {
   @@index([salaryId])
 }
 
+model EmployeeTaxConfig {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  regime String // OLD / NEW
+
+  standardDeduction Boolean @default(true)
+  declared80C Float @default(0)
+
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+
+  createdAt DateTime @default(now())
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+ @@index([userId, companyId, effectiveFrom])
+}
+
+model TaxSlab {
+  id Int @id @default(autoincrement())
+
+  regime String // OLD / NEW
+
+  minIncome Decimal @db.Decimal(12,2)
+  maxIncome Decimal @db.Decimal(12,2)
+  taxRate   Float
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  financialYear String // "2024-25"
+
+  @@index([companyId, regime, financialYear])
+}
+
+model PayrollRun {
+  id Int @id @default(autoincrement())
+
+  companyId Int
+
+  cycleId Int
+
+  company   Company @relation(fields: [companyId], references: [id])
+  cycle     PayrollCycle @relation(fields: [cycleId], references: [id])
+
+  status PayrollRunStatus // DRAFT, FINALIZED
+  isLocked Boolean @default(false)
+  
+
+  createdAt DateTime @default(now())
+  salarySlips SalarySlip[]
+
+  @@index([companyId, cycleId])
+
+}
+
+model SalaryHistory {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  companyId Int
+
+  company   Company @relation(fields: [companyId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
 
 
+  oldSalary Decimal @db.Decimal(12,2)
+  newSalary Decimal @db.Decimal(12,2)
+
+  changeType SalaryChangeType // HIKE, PROMOTION
+
+  effectiveDate DateTime
+
+  createdAt DateTime @default(now())
+}
 
 model SalarySlip {
   id Int @id @default(autoincrement())
@@ -679,12 +783,13 @@ model SalarySlip {
   salaryId Int
   salary   EmployeeSalary @relation(fields: [salaryId], references: [id])
 
-  month Int
-  year  Int
+  cycleId Int
+  cycle   PayrollCycle @relation(fields: [cycleId], references: [id])
 
-  grossAmount    Float
-  totalDeduction Float
-  netPay         Float
+  isLocked Boolean @default(false)
+  grossAmount    Decimal @db.Decimal(12,2)
+  totalDeduction Decimal @db.Decimal(12,2)
+  netPay         Decimal @db.Decimal(12,2)
 
   generatedAt DateTime @default(now())
 
@@ -694,8 +799,11 @@ model SalarySlip {
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
 
-  @@unique([userId, month, year])
-  @@index([companyId])
+  payrollRunId Int
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id])
+
+  @@unique([userId, cycleId])
+  @@index([companyId, cycleId])
 }
 
 model SalarySlipComponent {
@@ -711,8 +819,8 @@ model SalarySlipComponent {
   componentType ComponentType
   valueType     ValueType
 
-  value  Float
-  amount Float
+  value  Decimal @db.Decimal(12,2)
+  amount Decimal @db.Decimal(12,2)
 
   @@index([salarySlipId])
 }
@@ -729,16 +837,59 @@ model SalaryAdjustment {
   name String
 
   componentType ComponentType
-  amount        Float
-
+  amount        Decimal @db.Decimal(12,2)
+  
   month Int
   year  Int
 
+  cycleId Int
+  cycle   PayrollCycle @relation(fields: [cycleId], references: [id])
+
+
   createdAt DateTime @default(now())
 
-  @@index([userId, month, year])
+   @@index([userId, month, year])
+  @@index([userId, cycleId])
 }
 
+model PayrollCycle {
+  id Int @id @default(autoincrement())
+
+  name String
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+  payoutDate DateTime
+
+  status PayrollStatus @default(OPEN)
+
+  salarySlips SalarySlip[]
+  SalaryAdjustment SalaryAdjustment[]
+  PayrollRun PayrollRun[]
+
+  
+
+
+  @@index([companyId, startDate, endDate])
+}
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  tableName String
+  recordId  Int
+
+  userId Int?
+
+  action String
+
+  oldData Json?
+  newData Json?
+
+  createdAt DateTime @default(now())
+}
 
 model Loan {
   id Int @id @default(autoincrement())
@@ -749,15 +900,15 @@ model Loan {
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
 
-  principalAmount Float
-  interestRate    Float // percentage
+  principalAmount Decimal @db.Decimal(12,2)
+  interestRate    Decimal @db.Decimal(12,2) // percentage
   tenureMonths    Int
   olderPaymentId  Int? 
 
-  emiAmount      Float
-  totalRepayable Float
+  emiAmount      Decimal @db.Decimal(12,2)
+  totalRepayable Decimal @db.Decimal(12,2)
 
-  remainingAmount Float
+  remainingAmount Decimal @db.Decimal(12,2)
   status          String @default("ACTIVE") 
   disbursedAt DateTime @default(now())
 
@@ -765,6 +916,7 @@ model Loan {
 
   @@index([userId])
   @@index([companyId])
+  @@index([userId, status])
 }
 
 model LoanRepayment {
@@ -788,7 +940,6 @@ enum CallStatus {
   ONGOING
   CANCELLED
 }
-
 
 enum CallType {
   CUSTOMER
