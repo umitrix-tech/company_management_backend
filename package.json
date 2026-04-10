@@ -16,7 +16,10 @@
     "install:all": "npm install",
     "db:migrate": "npx prisma migrate dev --schema=packages/database/prisma/schema.prisma",
     "db:push": "npx prisma db push --schema=packages/database/prisma/schema.prisma",
-    "db:generate": "prisma generate --schema=packages/database/prisma/schema.prisma"
+    "db:generate": "prisma generate --schema=packages/database/prisma/schema.prisma",
+    "db:apply": "npm run db:migrate && npm run db:generate",
+    "db:formate":"npx primsma format --schema=packages/databases/prisma/schema.prisma",
+    "db:seed": "npm run seed -w packages/database"
   },
   "devDependencies": {
     "dotenv": "^17.4.1",
