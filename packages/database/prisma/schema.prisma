@@ -20,6 +20,7 @@ enum ComponentType {
 enum ValueType {
   FIXED
   PERCENTAGE
+  FORMULA
 }
 
 enum SalaryMode {
@@ -610,6 +611,7 @@ model SalaryTemplate {
   components       TemplateComponent[]
   employeeSalaries EmployeeSalary[]
 
+  isDeleted Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -624,11 +626,14 @@ model TemplateComponent {
 
   name String
   code String? // e.g. BASIC, HRA
+  
 
   componentType ComponentType
   valueType     ValueType
   value         Float
   formula       String?
+  isTaxable Boolean @default(true)
+
 
   order Int?
 
@@ -650,15 +655,11 @@ model EmployeeSalary {
 
   salaryMode SalaryMode
 
-  baseSalary Decimal @db.Decimal(12,2)
-
-  // workingDaysPerMonth Int?
-  // workingHoursPerDay  Int?
-
   effectiveFrom DateTime
   effectiveTo   DateTime?
 
   isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   components SalaryComponent[]
   slips      SalarySlip[]
@@ -710,6 +711,7 @@ model EmployeeTaxConfig {
   effectiveTo   DateTime?
 
   createdAt DateTime @default(now())
+  isDeleted Boolean @default(false)
 
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
@@ -782,9 +784,9 @@ model SalaryHistory {
   oldSalary Decimal @db.Decimal(12,2)
   newSalary Decimal @db.Decimal(12,2)
 
-  changeType SalaryChangeType // HIKE, PROMOTION
+  changeType SalaryChangeType // HIKE, PROMOTION, FIRST_SALARY
 
-  effectiveDate DateTime
+  effectiveDate DateTime @default(now())
 
   createdAt DateTime @default(now())
 }
@@ -833,6 +835,7 @@ model SalarySlipComponent {
 
   componentType ComponentType
   valueType     ValueType
+  isTaxable Boolean @default(true)
 
   value  Decimal @db.Decimal(12,2)
   amount Decimal @db.Decimal(12,2)
