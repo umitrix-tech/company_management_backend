@@ -699,8 +699,9 @@ model EmployeeTaxConfig {
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
-
-  regime String // OLD / NEW
+  
+  taxSlabId Int
+  taxSlab   TaxSlab @relation(fields: [taxSlabId], references: [id])
 
   standardDeduction Boolean @default(true)
   declared80C Float @default(0)
@@ -716,22 +717,36 @@ model EmployeeTaxConfig {
  @@index([userId, companyId, effectiveFrom])
 }
 
-model TaxSlab {
-  id Int @id @default(autoincrement())
+  model TaxSlab {
+  id            Int       @id @default(autoincrement())
+  financialYear String   
+  regime String  
+  
+  companyId     Int
+  company       Company   @relation(fields: [companyId], references: [id])
+  isDeleted Boolean @default(false)
 
-  regime String // OLD / NEW
+  slabs         slabs[]
+  EmployeeTaxConfig EmployeeTaxConfig[]
 
-  minIncome Decimal @db.Decimal(12,2)
-  maxIncome Decimal @db.Decimal(12,2)
-  taxRate   Float
 
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id])
 
-  financialYear String // "2024-25"
+  @@index([companyId, financialYear])
+  }
 
-  @@index([companyId, regime, financialYear])
-}
+  model slabs {
+    id           Int        @id @default(autoincrement())
+  
+  minIncome    Decimal    @db.Decimal(12, 2)
+  maxIncome    Decimal?   @db.Decimal(12, 2) // Nullable for "and above"
+  taxRate      Float      // e.g., 0.05 for 5%
+
+  taxSlabId  Int
+  TaxSlab    TaxSlab  @relation(fields: [taxSlabId], references: [id], onDelete: Cascade)
+
+  @@index([taxSlabId])
+  @@unique([taxSlabId, minIncome, maxIncome])
+  }
 
 model PayrollRun {
   id Int @id @default(autoincrement())

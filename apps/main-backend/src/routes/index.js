@@ -22,5 +22,7 @@ router.use("/ai", require("./ai"));
 router.use("/salary", require("./salary.route"));
 router.use("/call", require("./call.route"));
 router.use("/dashboard", require("./dashboard.route"));
+router.use("/tax-slab", require("./taxSlab"));
+router.use("/employee-tax-config", require("./employeeTaxConfig"));
 
 module.exports = router;
