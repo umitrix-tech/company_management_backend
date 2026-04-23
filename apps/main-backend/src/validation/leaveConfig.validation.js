@@ -10,12 +10,12 @@ const createLeaveTypeSchema = Joi.object({
 
   // Nested configuration
   config: Joi.object({
-    monthlyLimit: Joi.number().min(0).optional(),
-    yearlyLimit: Joi.number().min(0).optional(),
+    monthlyLimit: Joi.number().min(0).allow(null).optional(),
+    yearlyLimit: Joi.number().min(0).allow(null).optional(),
     gender: Joi.string().valid("ALL", "MALE", "FEMALE").optional(),
     canCarryForward: Joi.boolean().default(false),
     maxConsecutiveDays: Joi.number().integer().min(1).optional(),
-  }).or("monthlyLimit", "yearlyLimit")   // 🔥 important line
+  }).or("monthlyLimit", "yearlyLimit")
     .required()
 });
 
@@ -29,8 +29,8 @@ const updateLeaveTypeSchema = Joi.object({
   isPaid: Joi.boolean().optional(),
 
   config: Joi.object({
-    monthlyLimit: Joi.number().min(0).optional(),
-    yearlyLimit: Joi.number().min(0).optional(),
+     monthlyLimit: Joi.number().min(0).allow(null).optional(),
+    yearlyLimit: Joi.number().min(0).allow(null).optional(),
     gender: Joi.string().valid("ALL", "MALE", "FEMALE").optional(),
     canCarryForward: Joi.boolean().optional(),
     maxConsecutiveDays: Joi.number().integer().min(1).optional(),
@@ -43,6 +43,7 @@ const updateLeaveTypeSchema = Joi.object({
 const listLeaveTypeSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(10),
+  id: Joi.number().integer().positive().optional(),
 });
 
 /**

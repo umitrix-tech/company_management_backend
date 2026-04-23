@@ -22,6 +22,7 @@ const {
 const {
   getPermissionConfigController,
   setupPermissionConfigController,
+  setupDeletePermissionConfigController,
 } = require("../controller/permissionConfig.controller");
 
 // APPLY
@@ -63,4 +64,11 @@ router.post(
   setupPermissionConfigController
 );
 
+
+router.delete(
+  "/config",
+  auth,
+  validate(idParamSchema),
+  setupDeletePermissionConfigController 
+);
 module.exports = router;

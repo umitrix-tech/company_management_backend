@@ -24,8 +24,9 @@ router.use("/employee-salary", require("./employeeSalary.route"));
 router.use("/call", require("./call.route"));
 router.use("/dashboard", require("./dashboard.route"));
 router.use("/tax-slab", require("./taxSlab"));
+
 router.use("/leave-config", require("./leaveConfig"));
 router.use("/leave-request", require("./leaveRequest"));
-router.use("/permission-request", require("./permissionRequest"));
+router.use("/permission", require("./permissionRequest"));
 
 module.exports = router;

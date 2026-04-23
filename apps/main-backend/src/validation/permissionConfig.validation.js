@@ -5,7 +5,7 @@ const Joi = require("joi");
  */
 const setupPermissionConfigSchema = Joi.object({
   monthlyLimit: Joi.number().integer().min(0).required(),
-  maxHoursPerPermission: Joi.number().min(0.5).required(),
+  maxMinutesPerPermission: Joi.number().min(0.5).required(),
 });
 
 module.exports = {

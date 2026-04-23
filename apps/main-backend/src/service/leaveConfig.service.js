@@ -1,6 +1,7 @@
 const prisma = require("@umitrix/database");
 const AppError = require("../utils/AppError");
 const catchAsyncPrismaError = require("../utils/catchAsyncPrismaError");
+const { Prisma } = require("@prisma/client");
 
 /**
  * CREATE LEAVE TYPE & CONFIG
@@ -39,7 +40,11 @@ const updateLeaveTypeService = async (payload, user) => {
     const { id, name, code, isPaid, config } = payload;
 
     const existing = await prisma.leaveType.findFirst({
-      where: { id: Number(id), companyId: user.companyId, isDeleted: false },
+      where: {
+        id: Number(id),
+        companyId: user.companyId,
+        isDeleted: false,
+      },
     });
 
     if (!existing) {
@@ -47,45 +52,69 @@ const updateLeaveTypeService = async (payload, user) => {
     }
 
     return await prisma.$transaction(async (tx) => {
-      // Update LeaveType
+      // ✅ Step 1: Update LeaveType
       const updatedType = await tx.leaveType.update({
         where: { id: Number(id) },
         data: { name, code, isPaid },
       });
 
-      // Update Config if provided
+      // ✅ Step 2: Handle config versioning
       if (config) {
-        // Find existing config
+        // Get current active config
         const existingConfig = await tx.leaveConfiguration.findFirst({
-          where: { leaveTypeId: Number(id), isDeleted: false },
+          where: {
+            leaveTypeId: Number(id),
+            isActive: true,
+            isDeleted: false,
+          },
+          orderBy: { version: "desc" },
         });
 
-        if (existingConfig) {
+        const isConfigChanged =
+          config &&
+          existingConfig &&
+          (config.monthlyLimit !== existingConfig.monthlyLimit ||
+            config.yearlyLimit !== existingConfig.yearlyLimit ||
+            config.gender !== existingConfig.gender ||
+            config.canCarryForward !== existingConfig.canCarryForward ||
+            config.maxConsecutiveDays !== existingConfig.maxConsecutiveDays);
+
+        // 🔹 If config exists → deactivate it
+        if (isConfigChanged) {
           await tx.leaveConfiguration.update({
             where: { id: existingConfig.id },
-            data: config,
+            data: { isActive: false },
           });
-        } else {
+
           await tx.leaveConfiguration.create({
             data: {
               ...config,
               leaveTypeId: Number(id),
               companyId: user.companyId,
+              version: existingConfig ? existingConfig.version + 1 : 1,
+              isActive: true,
             },
           });
         }
+
+        // 🔹 Create new config (versioned)
       }
 
+      // ✅ Step 3: Return updated data
       return await tx.leaveType.findUnique({
         where: { id: Number(id) },
-        include: { configs: true },
+        include: {
+          configs: {
+            where: { isDeleted: false , isActive: true},
+            orderBy: { version: "desc" },
+          },
+        },
       });
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }
 };
-
 /**
  * DELETE LEAVE TYPE
  */
@@ -113,12 +142,13 @@ const deleteLeaveTypeService = async (id, user) => {
  */
 const listLeaveTypesService = async (query, user) => {
   try {
-    const { page = 1, limit = 10 } = query;
+    const { page = 1, limit = 10, id= null } = query;
     const skip = (page - 1) * limit;
 
     const where = {
       companyId: user.companyId,
       isDeleted: false,
+      ...(id && { id: Number(id) }),
     };
 
     const [data, total] = await Promise.all([
@@ -128,7 +158,7 @@ const listLeaveTypesService = async (query, user) => {
         take: Number(limit),
         include: {
           configs: {
-            where: { isDeleted: false }
+            where: { isDeleted: false },
           },
         },
       }),

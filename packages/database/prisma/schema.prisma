@@ -130,11 +130,17 @@ model Company {
 
   salaryTemplates   SalaryTemplate[]
   employeeSalaries  EmployeeSalary[]
-  salarySlips       SalarySlip[]
+  salarySlips       SalarySlip[]  
   attendances       Attendance[]
   salaryAdjustments SalaryAdjustment[]
   loans             Loan[]
   Review            Review[]
+
+  PermissionConfiguration PermissionConfiguration[]
+  PermissionRequest PermissionRequest[]
+  LeaveRequest LeaveRequest[]
+ LeaveConfiguration LeaveConfiguration[]
+ LeaveType LeaveType[]
 }
 
 model RolePermission {
@@ -233,6 +239,9 @@ model User {
   adjustments      SalaryAdjustment[]
   loans            Loan[]
   SalaryHistory SalaryHistory[]
+  leaveRequests LeaveRequest[]
+  approvedLeaves LeaveRequest[] @relation("ApprovedLeaves")
+  permissionRequests PermissionRequest[]
 
 
   @@unique([companyId, empCode])
@@ -1035,12 +1044,18 @@ model LeaveType {
 
   configs        LeaveConfiguration[]
   requests       LeaveRequest[]
-  balances       LeaveBalance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([companyId])
+}
+
+enum LeaveConfigGender {
+  ALL
+  MALE
+  FEMALE
+  OTHER
 }
 
 model LeaveConfiguration {
@@ -1052,7 +1067,7 @@ model LeaveConfiguration {
   monthlyLimit Float?
   yearlyLimit  Float?
   
-  gender       Gender?
+  gender       LeaveConfigGender // ALL, MALE, FEMALE
   
   canCarryForward Boolean @default(false)
   maxConsecutiveDays Int?
@@ -1060,6 +1075,8 @@ model LeaveConfiguration {
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
 
+  isActive  Boolean @default(true)
+  version   Int     @default(1)
   isDeleted Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -1096,25 +1113,6 @@ model LeaveRequest {
   @@index([userId, companyId])
 }
 
-model LeaveBalance {
-  id Int @id @default(autoincrement())
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  leaveTypeId Int
-  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
-
-  totalQuota Float
-  usedQuota  Float @default(0)
-  year       Int
-
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id])
-
-  @@unique([userId, leaveTypeId, year])
-  @@index([companyId, userId])
-}
 
 model PermissionRequest {
   id Int @id @default(autoincrement())
@@ -1143,7 +1141,7 @@ model PermissionConfiguration {
   id Int @id @default(autoincrement())
 
   monthlyLimit          Int   @default(2)
-  maxHoursPerPermission Float @default(2.0)
+  maxMinutesPerPermission Float @default(120)
 
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
