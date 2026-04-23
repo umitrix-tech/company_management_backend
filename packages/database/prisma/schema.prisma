@@ -1014,3 +1014,142 @@ model Review {
   
   createdAt DateTime @default(now())
 }
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveType {
+  id   Int    @id @default(autoincrement())
+  name String
+  code String @unique
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  isPaid    Boolean @default(true)
+  isDeleted Boolean @default(false)
+
+  configs        LeaveConfiguration[]
+  requests       LeaveRequest[]
+  balances       LeaveBalance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+model LeaveConfiguration {
+  id Int @id @default(autoincrement())
+
+  leaveTypeId Int
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  monthlyLimit Float?
+  yearlyLimit  Float?
+  
+  gender       Gender?
+  
+  canCarryForward Boolean @default(false)
+  maxConsecutiveDays Int?
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, leaveTypeId])
+}
+
+model LeaveRequest {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  leaveTypeId Int
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+  daysCount Float
+
+  reason String?
+  status LeaveRequestStatus @default(PENDING)
+
+  approvedById Int?
+  approvedBy   User? @relation("ApprovedLeaves", fields: [approvedById], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, companyId])
+}
+
+model LeaveBalance {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  leaveTypeId Int
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  totalQuota Float
+  usedQuota  Float @default(0)
+  year       Int
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, leaveTypeId, year])
+  @@index([companyId, userId])
+}
+
+model PermissionRequest {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  date      DateTime
+  startTime String   // "09:00"
+  endTime   String   // "11:00"
+  hours     Float
+
+  reason String?
+  status LeaveRequestStatus @default(PENDING)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, companyId, date])
+}
+
+model PermissionConfiguration {
+  id Int @id @default(autoincrement())
+
+  monthlyLimit          Int   @default(2)
+  maxHoursPerPermission Float @default(2.0)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
