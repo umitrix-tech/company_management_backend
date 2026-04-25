@@ -277,8 +277,6 @@ const listPunchLogService = async (query, user) => {
         orderBy: { punchIn: "desc" },
       }),
     ]);
-    console.log(data, 'data');
-
 
     // --- Group by date ---
     const formatDateKey = (date) => {
@@ -527,7 +525,6 @@ const particularEmployeeAttendanceService = async (query, user) => {
     };
 
 
-    console.log(where, 'where');
 
     const data = await prisma.punchLog.findMany({
       where,

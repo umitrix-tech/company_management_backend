@@ -66,7 +66,7 @@ const createCompanyService = async (payload, user) => {
       data: {
         companyId: responce.id,
         roleId: role.id,
-        backEndStatus:USER_BACKEND_STATUS.company_created
+        backEndStatus: USER_BACKEND_STATUS.company_created
       },
     });
 
@@ -76,7 +76,7 @@ const createCompanyService = async (payload, user) => {
         email: userDetails.email,
         role: ROLE_OWNER,
         companyId: responce.id,
-        deviceId:user.deviceId,
+        deviceId: user.deviceId,
       },
       process.env.JWT_SECRET,
       {
@@ -99,7 +99,6 @@ const companyUpdateService = async (payload, user) => {
     const company = await prisma.company.findUnique({
       where: { id: parseInt(id) },
     });
-    console.log(company, ";com");
 
     if (!company) {
       throw new AppError("Company not found", 404);

@@ -27,8 +27,6 @@ const applyPermissionService = async (payload, user) => {
 
     // 2. Fetch Configuration
     const config = await getPermissionConfigService(user);
-    console.log(config, 'config');
-
 
     if (!config) {
       throw new AppError("Permission configuration not found", 404);

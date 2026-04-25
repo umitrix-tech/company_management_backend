@@ -204,8 +204,6 @@ const forgotPasswordOtpService = async ({ email }) => {
 const passwordChangeService = async (payload, user) => {
 
   try {
-    console.log(user);
-
     const { companyId, id } = user;
     const { password } = payload
 

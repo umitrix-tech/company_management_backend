@@ -10,8 +10,7 @@ const openai = new OpenAI({
 const processChatService = async ({ query }, user) => {
     try {
         const { companyId, id: userId } = user;
-        console.log(query,'query');
-        
+
 
         if (!companyId) {
             throw new AppError("Company information missing", 400);
@@ -84,7 +83,7 @@ const processChatService = async ({ query }, user) => {
             throw error;
         }
         if (error.status === 401 || error.status === 403) {
-             throw new AppError(error.message, error.status); // OpenAI Error handling
+            throw new AppError(error.message, error.status); // OpenAI Error handling
         }
         throw catchAsyncPrismaError(error);
     }
