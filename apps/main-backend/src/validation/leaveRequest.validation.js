@@ -8,6 +8,12 @@ const applyLeaveSchema = Joi.object({
   startDate: Joi.date().iso().required(),
   endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
   reason: Joi.string().trim().optional(),
+  isHalfDay: Joi.boolean().default(false),
+  halfDaySession: Joi.number().integer().valid(0, 1).when("isHalfDay", {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });
 
 /**
@@ -20,10 +26,22 @@ const approveLeaveSchema = Joi.object({
 });
 
 /**
+ * UPDATE LEAVE (User can update if still PENDING)
+ */
+const updateLeaveSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+  leaveTypeId: Joi.number().integer().positive().optional(),
+  startDate: Joi.date().iso().optional(),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).optional(),
+  reason: Joi.string().trim().optional(),
+  isHalfDay: Joi.boolean().optional(),
+  halfDaySession: Joi.number().integer().valid(0, 1).optional(),
+});
+
+/**
  * LIST
  */
 const listLeaveRequestSchema = Joi.object({
-  userId: Joi.number().integer().positive().optional(),
   status: Joi.string().valid("PENDING", "APPROVED", "REJECTED", "CANCELLED").optional(),
   leaveTypeId: Joi.number().integer().positive().optional(),
   page: Joi.number().integer().min(1).default(1),
@@ -40,6 +58,7 @@ const idParamSchema = Joi.object({
 module.exports = {
   applyLeaveSchema,
   approveLeaveSchema,
+  updateLeaveSchema,
   listLeaveRequestSchema,
   idParamSchema,
 };

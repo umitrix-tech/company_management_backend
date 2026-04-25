@@ -10,18 +10,19 @@ const getPermissionConfigService = async (user) => {
       where: { companyId: user.companyId },
     });
 
-    if (!config) {
-      // Create default if not exists
-      config = await prisma.permissionConfiguration.create({
-        data: {
-          companyId: user.companyId,
-          monthlyLimit: 2,
-          maxHoursPerPermission: 2.0,
-        },
-      });
-    }
-
     return config;
+
+    // if (!config) {
+    //   // Create default if not exists
+    //   config = await prisma.permissionConfiguration.create({
+    //     data: {
+    //       companyId: user.companyId,
+    //       monthlyLimit: 2,
+    //       maxHoursPerPermission: 2.0,
+    //     },
+    //   });
+    // }
+
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }

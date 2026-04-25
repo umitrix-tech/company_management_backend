@@ -1051,13 +1051,6 @@ model LeaveType {
   @@index([companyId])
 }
 
-enum LeaveConfigGender {
-  ALL
-  MALE
-  FEMALE
-  OTHER
-}
-
 model LeaveConfiguration {
   id Int @id @default(autoincrement())
 
@@ -1067,7 +1060,7 @@ model LeaveConfiguration {
   monthlyLimit Float?
   yearlyLimit  Float?
   
-  gender       LeaveConfigGender // ALL, MALE, FEMALE
+  gender       Gender? // ALL, MALE, FEMALE
   
   canCarryForward Boolean @default(false)
   maxConsecutiveDays Int?
@@ -1085,6 +1078,8 @@ model LeaveConfiguration {
   @@index([companyId, leaveTypeId])
 }
 
+
+
 model LeaveRequest {
   id Int @id @default(autoincrement())
 
@@ -1100,6 +1095,9 @@ model LeaveRequest {
 
   reason String?
   status LeaveRequestStatus @default(PENDING)
+
+  isHalfDay      Boolean @default(false)
+  halfDaySession Int?    // 0: First Half, 1: Second Half
 
   approvedById Int?
   approvedBy   User? @relation("ApprovedLeaves", fields: [approvedById], references: [id])
@@ -1123,7 +1121,7 @@ model PermissionRequest {
   date      DateTime
   startTime String   // "09:00"
   endTime   String   // "11:00"
-  hours     Float
+  minutes   Int
 
   reason String?
   status LeaveRequestStatus @default(PENDING)
@@ -1141,7 +1139,7 @@ model PermissionConfiguration {
   id Int @id @default(autoincrement())
 
   monthlyLimit          Int   @default(2)
-  maxMinutesPerPermission Float @default(120)
+  maxMinutesPerPermission   Int @default(120)
 
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])

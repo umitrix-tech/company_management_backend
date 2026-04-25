@@ -26,7 +26,7 @@ router.use("/dashboard", require("./dashboard.route"));
 router.use("/tax-slab", require("./taxSlab"));
 
 router.use("/leave-config", require("./leaveConfig"));
-router.use("/leave-request", require("./leaveRequest"));
+router.use("/leave", require("./leaveRequest"));
 router.use("/permission", require("./permissionRequest"));
 
 module.exports = router;

@@ -18,18 +18,25 @@ const applyPermissionService = async (payload, user) => {
     const [endH, endM] = endTime.split(":").map(Number);
     const startTotalM = startH * 60 + startM;
     const endTotalM = endH * 60 + endM;
-    
+
     if (endTotalM <= startTotalM) {
       throw new AppError("End time must be after start time", 400);
     }
-    const hours = (endTotalM - startTotalM) / 60;
+    const minutes = endTotalM - startTotalM;
+    const hours = minutes / 60;
 
     // 2. Fetch Configuration
     const config = await getPermissionConfigService(user);
+    console.log(config, 'config');
+
+
+    if (!config) {
+      throw new AppError("Permission configuration not found", 404);
+    }
 
     // 3. Max hours per permission check
-    if (hours > config.maxHoursPerPermission) {
-      throw new AppError(`A single permission cannot exceed ${config.maxHoursPerPermission} hours`, 400);
+    if (minutes > config.maxMinutesPerPermission) {
+      throw new AppError(`A single permission cannot exceed ${config.maxMinutesPerPermission / 60} hours`, 400);
     }
 
     // 4. Monthly frequency check
@@ -55,11 +62,94 @@ const applyPermissionService = async (payload, user) => {
         date: requestDate,
         startTime,
         endTime,
-        hours,
+        minutes,
         reason,
         companyId: user.companyId,
       },
     });
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
+/**
+ * UPDATE PERMISSION
+ */
+const updatePermissionService = async (payload, user) => {
+  try {
+    const { id, date, startTime, endTime, reason } = payload;
+
+    const request = await prisma.permissionRequest.findFirst({
+      where: { id: Number(id), companyId: user.companyId },
+    });
+
+    if (!request) throw new AppError("Permission request not found", 404);
+    if (request.status !== "PENDING") throw new AppError("Only pending requests can be updated", 400);
+    if (request.userId !== user.id) throw new AppError("Access denied", 403);
+
+    let hours = request.hours;
+    if (startTime || endTime) {
+      const finalStartTime = startTime || request.startTime;
+      const finalEndTime = endTime || request.endTime;
+      const [startH, startM] = finalStartTime.split(":").map(Number);
+      const [endH, endM] = finalEndTime.split(":").map(Number);
+      const startTotalM = startH * 60 + startM;
+      const endTotalM = endH * 60 + endM;
+      if (endTotalM <= startTotalM) throw new AppError("End time must be after start time", 400);
+      hours = (endTotalM - startTotalM) / 60;
+    }
+
+    return await prisma.permissionRequest.update({
+      where: { id: Number(id) },
+      data: {
+        date: date ? new Date(date) : undefined,
+        startTime,
+        endTime,
+        hours,
+        reason,
+      },
+    });
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
+/**
+ * DELETE PERMISSION
+ */
+const deletePermissionService = async (id, user) => {
+  try {
+    const request = await prisma.permissionRequest.findFirst({
+      where: { id: Number(id), companyId: user.companyId },
+    });
+
+    if (!request) throw new AppError("Permission request not found", 404);
+    if (request.userId !== user.id) {
+      throw new AppError("You are not authorized to perform this action", 403);
+    }
+
+    return await prisma.permissionRequest.update({
+      where: { id: Number(id) },
+      data: { status: "CANCELLED" },
+    });
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
+/**
+ * GET BY ID
+ */
+const getPermissionByIdService = async (id, user) => {
+  try {
+    const data = await prisma.permissionRequest.findFirst({
+      where: { id: Number(id), companyId: user.companyId },
+      include: {
+        user: { select: { name: true, empCode: true } },
+      },
+    });
+    if (!data) throw new AppError("Permission request not found", 404);
+    return data;
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }
@@ -129,8 +219,47 @@ const listPermissionsService = async (query, user) => {
   }
 };
 
+/**
+ * GET PERMISSION SUMMARY
+ */
+const getPermissionSummaryService = async (userId, user) => {
+  try {
+    const targetUserId = userId ? Number(userId) : user.id;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const currentMonthStart = new Date(year, month, 1);
+    const currentMonthEnd = new Date(year, month + 1, 0);
+
+    const config = await getPermissionConfigService(user);
+
+    const taken = await prisma.permissionRequest.count({
+      where: {
+        userId: targetUserId,
+        status: "APPROVED",
+        date: { gte: currentMonthStart, lte: currentMonthEnd },
+      },
+    });
+
+    const overall = config.monthlyLimit;
+    const avail = Math.max(0, overall - taken);
+
+    return {
+      overall,
+      taken,
+      avail,
+    };
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
 module.exports = {
   applyPermissionService,
+  updatePermissionService,
+  deletePermissionService,
+  getPermissionByIdService,
   updatePermissionStatusService,
   listPermissionsService,
+  getPermissionSummaryService,
 };

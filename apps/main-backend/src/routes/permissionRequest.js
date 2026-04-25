@@ -7,6 +7,7 @@ const validate = require("../validation");
 const {
   applyPermissionSchema,
   updatePermissionStatusSchema,
+  updatePermissionSchema,
   listPermissionRequestSchema,
   idParamSchema,
 } = require("../validation/permissionRequest.validation");
@@ -15,8 +16,12 @@ const { setupPermissionConfigSchema } = require("../validation/permissionConfig.
 
 const {
   applyPermissionController,
+  updatePermissionController,
+  deletePermissionController,
+  getPermissionByIdController,
   updatePermissionStatusController,
   listPermissionsController,
+  getPermissionSummaryController,
 } = require("../controller/permissionRequest.controller");
 
 const {
@@ -27,10 +32,45 @@ const {
 
 // APPLY
 router.post(
-  "/apply",
+  "/create",
   auth,
   validate(applyPermissionSchema),
   applyPermissionController
+);
+
+
+// LIST
+router.get(
+  "/",
+  auth,
+  validate(listPermissionRequestSchema),
+  listPermissionsController
+);
+8
+
+// UPDATE
+router.put(
+  "/:id",
+  auth,
+  validate(idParamSchema, "params"),
+  validate(updatePermissionSchema),
+  updatePermissionController
+);
+
+// DELETE / CANCEL
+router.delete(
+  "/",
+  auth,
+  validate(idParamSchema),
+  deletePermissionController
+);
+
+// GET BY ID
+router.get(
+  "/detail/:id",
+  auth,
+  validate(idParamSchema, "params"),
+  getPermissionByIdController
 );
 
 // STATUS UPDATE
@@ -41,12 +81,12 @@ router.put(
   updatePermissionStatusController
 );
 
-// LIST
+
+// SUMMARY
 router.get(
-  "/",
+  "/summary",
   auth,
-  validate(listPermissionRequestSchema),
-  listPermissionsController
+  getPermissionSummaryController
 );
 
 // --- CONFIGURATION ---
@@ -64,11 +104,11 @@ router.post(
   setupPermissionConfigController
 );
 
-
 router.delete(
   "/config",
   auth,
   validate(idParamSchema),
-  setupDeletePermissionConfigController 
+  setupDeletePermissionConfigController
 );
+
 module.exports = router;

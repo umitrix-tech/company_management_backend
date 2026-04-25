@@ -19,6 +19,17 @@ const updatePermissionStatusSchema = Joi.object({
 });
 
 /**
+ * UPDATE PERMISSION (User can update if still PENDING)
+ */
+const updatePermissionSchema = Joi.object({
+  id: Joi.number().integer().positive().required(),
+  date: Joi.date().iso().optional(),
+  startTime: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).optional(),
+  endTime: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).optional(),
+  reason: Joi.string().trim().optional(),
+});
+
+/**
  * LIST
  */
 const listPermissionRequestSchema = Joi.object({
@@ -38,6 +49,7 @@ const idParamSchema = Joi.object({
 module.exports = {
   applyPermissionSchema,
   updatePermissionStatusSchema,
+  updatePermissionSchema,
   listPermissionRequestSchema,
   idParamSchema,
 };

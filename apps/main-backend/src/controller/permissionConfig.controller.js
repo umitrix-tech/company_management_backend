@@ -17,7 +17,7 @@ const setupPermissionConfigController = catchAsync(async (req, res) => {
 
 const setupDeletePermissionConfigController = catchAsync(async (req, res) => {
   const { id } = req.query;
-   const data = await setupDeletePermissionConfigService(id, req.user);
+  const data = await setupDeletePermissionConfigService(id, req.user);
   res.status(200).json({ message: "Permission configuration deleted successfully" , data});
 ;
 });
