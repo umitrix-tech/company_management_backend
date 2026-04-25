@@ -113,7 +113,7 @@ const applyLeaveService = async (payload, user) => {
     }
 
     // 7. Create Request
-    return await prisma.leaveRequest.create({
+    const newRequest = await prisma.leaveRequest.create({
       data: {
         userId: user.id,
         leaveTypeId: Number(leaveTypeId),
@@ -126,6 +126,27 @@ const applyLeaveService = async (payload, user) => {
         companyId: user.companyId,
       },
     });
+
+    // Send Notification to Manager
+    try {
+      const employee = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { manager: { select: { fcmToken: true, name: true } } }
+      });
+
+      if (employee?.manager?.fcmToken) {
+        const { sendNotification } = require("./notification.service");
+        sendNotification("LEAVE_REQUEST", {
+          title: "New Leave Request",
+          body: `${employee.name} has applied for a leave starting ${startDate}.`,
+          leaveId: newRequest.id
+        }, employee.manager.fcmToken);
+      }
+    } catch (notifErr) {
+      console.error("Failed to send leave notification:", notifErr);
+    }
+
+    return newRequest;
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }

@@ -54,7 +54,7 @@ const applyPermissionService = async (payload, user) => {
     }
 
     // 5. Create Request
-    return await prisma.permissionRequest.create({
+    const newRequest = await prisma.permissionRequest.create({
       data: {
         userId: user.id,
         date: requestDate,
@@ -65,6 +65,27 @@ const applyPermissionService = async (payload, user) => {
         companyId: user.companyId,
       },
     });
+
+    // Send Notification to Manager
+    try {
+      const employee = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { manager: { select: { fcmToken: true, name: true } } }
+      });
+
+      if (employee?.manager?.fcmToken) {
+        const { sendNotification } = require("./notification.service");
+        sendNotification("PERMISSION_REQUEST", {
+          title: "New Permission Request",
+          body: `${employee.name} has requested permission for ${date}.`,
+          permissionId: newRequest.id
+        }, employee.manager.fcmToken);
+      }
+    } catch (notifErr) {
+      console.error("Failed to send permission notification:", notifErr);
+    }
+
+    return newRequest;
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }
@@ -169,7 +190,10 @@ const updatePermissionStatusService = async (payload, user) => {
 
     return await prisma.permissionRequest.update({
       where: { id: Number(id) },
-      data: { status },
+      data: { 
+        status,
+        approvedById: user.id
+      },
     });
   } catch (error) {
     throw catchAsyncPrismaError(error);

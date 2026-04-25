@@ -209,6 +209,7 @@ model User {
   logoUrl         String?
   backgroundUrl   String?   @default("https://pub-3ea8ee54beac4fd0807ffb8e21903f9d.r2.dev/media/1774767921529-pngtree-painting-of-a-contemporary-building-construction-site-on-white-background-including-image_15883562.jpg")
   documets        String[]   @default([])
+  fcmToken        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -242,6 +243,7 @@ model User {
   leaveRequests LeaveRequest[]
   approvedLeaves LeaveRequest[] @relation("ApprovedLeaves")
   permissionRequests PermissionRequest[]
+  approvedPermissions PermissionRequest[] @relation("ApprovedPermissions")
 
 
   @@unique([companyId, empCode])
@@ -1125,6 +1127,9 @@ model PermissionRequest {
 
   reason String?
   status LeaveRequestStatus @default(PENDING)
+
+  approvedById Int?
+  approvedBy   User? @relation("ApprovedPermissions", fields: [approvedById], references: [id])
 
   companyId Int
   company   Company @relation(fields: [companyId], references: [id])
