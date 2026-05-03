@@ -179,9 +179,32 @@ const listLeaveTypesService = async (query, user) => {
   }
 };
 
+/**
+ * LEAVE TYPES DROPDOWN
+ */
+const dropdownLeaveTypesService = async (user) => {
+  try {
+    const data = await prisma.leaveType.findMany({
+      where: {
+        companyId: user.companyId,
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+      },
+    });
+    return data;
+  } catch (error) {
+    throw catchAsyncPrismaError(error);
+  }
+};
+
 module.exports = {
   createLeaveTypeService,
   updateLeaveTypeService,
   deleteLeaveTypeService,
   listLeaveTypesService,
+  dropdownLeaveTypesService,
 };

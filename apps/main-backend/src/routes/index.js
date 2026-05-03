@@ -28,5 +28,6 @@ router.use("/tax-slab", require("./taxSlab"));
 router.use("/leave-config", require("./leaveConfig"));
 router.use("/leave", require("./leaveRequest"));
 router.use("/permission", require("./permissionRequest"));
+router.use("/notification", require("./notification.route"));
 
 module.exports = router;

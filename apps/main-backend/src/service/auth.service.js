@@ -102,7 +102,17 @@ const infoService = async (req, user) => {
     }
 
     const plan = await prisma.planHistory.findFirst({ where: { companyId: user.companyId } });
-    const ownuserInfo = await prisma.user.findUnique({ where: { id: parseInt(id), companyId: parseInt(companyId) } })
+    const ownuserInfo = await prisma.user.findUnique({
+      where: { id: parseInt(id), companyId: parseInt(companyId), isDetele: false }, include: {
+        role: true,
+      },
+      omit: {
+        password: true,
+        isDetele: true,
+        updatedAt: true,
+        createdAt: true,
+      }
+    })
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);

@@ -266,11 +266,16 @@ const getPermissionSummaryService = async (userId, user) => {
     const overall = config.monthlyLimit;
     const avail = Math.max(0, overall - taken);
 
-    return {
-      overall,
-      taken,
-      avail,
-    };
+    return [
+      {
+        id: "permission",
+        name: "General Permission",
+        code: "PR",
+        overall,
+        taken,
+        avail,
+      }
+    ];
   } catch (error) {
     throw catchAsyncPrismaError(error);
   }

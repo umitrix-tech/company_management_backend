@@ -4,6 +4,7 @@ const {
   updateLeaveTypeService,
   deleteLeaveTypeService,
   listLeaveTypesService,
+  dropdownLeaveTypesService,
 } = require("../service/leaveConfig.service");
 
 const createLeaveTypeController = catchAsync(async (req, res) => {
@@ -26,9 +27,15 @@ const listLeaveTypesController = catchAsync(async (req, res) => {
   res.status(200).json(data);
 });
 
+const dropdownLeaveTypesController = catchAsync(async (req, res) => {
+  const data = await dropdownLeaveTypesService(req.user);
+  res.status(200).json({ data });
+});
+
 module.exports = {
   createLeaveTypeController,
   updateLeaveTypeController,
   deleteLeaveTypeController,
   listLeaveTypesController,
+  dropdownLeaveTypesController,
 };

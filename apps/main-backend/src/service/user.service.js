@@ -173,6 +173,7 @@ const userProfileUpdateService = async (payload, user) => {
       throw new AppError("you cant update this user", 400);
     };
 
+    delete payload.id;
     const userUpdate = await prisma.user.update({
       where: { id },
       data: {

@@ -141,6 +141,7 @@ model Company {
   LeaveRequest LeaveRequest[]
  LeaveConfiguration LeaveConfiguration[]
  LeaveType LeaveType[]
+ notifications Notification[]
 }
 
 model RolePermission {
@@ -244,6 +245,7 @@ model User {
   approvedLeaves LeaveRequest[] @relation("ApprovedLeaves")
   permissionRequests PermissionRequest[]
   approvedPermissions PermissionRequest[] @relation("ApprovedPermissions")
+  notifications Notification[]
 
 
   @@unique([companyId, empCode])
@@ -1152,5 +1154,29 @@ model PermissionConfiguration {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([companyId])
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  userId Int  // The user who receives the notification
+  user   User @relation(fields: [userId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  title String
+  message String
+  
+  type String // "leave_request", "permission_request", "your_leave_request", "salary_notification", etc.
+  
+  isRead Boolean @default(false)
+  referenceId Int? // E.g., LeaveRequestId, PermissionRequestId, SalarySlipId
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isRead])
   @@index([companyId])
 }

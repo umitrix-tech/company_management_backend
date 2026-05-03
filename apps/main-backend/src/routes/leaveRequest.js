@@ -30,6 +30,13 @@ router.post(
   applyLeaveController
 );
 
+
+router.get(
+  "/summary",
+  auth,
+  getLeaveSummaryController
+);
+
 // LIST
 router.get(
   "/",
@@ -45,6 +52,14 @@ router.delete(
   auth,
   validate(idParamSchema),
   deleteLeaveController
+);
+
+// APPROVE / REJECT
+router.put(
+  "/status",
+  auth,
+  validate(approveLeaveSchema),
+  approveLeaveController
 );
 
 
@@ -66,20 +81,9 @@ router.get(
   getLeaveByIdController
 );
 
-// APPROVE / REJECT
-router.put(
-  "/status",
-  auth,
-  validate(approveLeaveSchema),
-  approveLeaveController
-);
 
 
 // SUMMARY
-router.get(
-  "/summary",
-  auth,
-  getLeaveSummaryController
-);
+
 
 module.exports = router;

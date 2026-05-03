@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -38,6 +39,12 @@ router.post(
   applyPermissionController
 );
 
+// SUMMARY
+router.get(
+  "/summary",
+  auth,
+  getPermissionSummaryController
+);
 
 // LIST
 router.get(
@@ -46,7 +53,13 @@ router.get(
   validate(listPermissionRequestSchema),
   listPermissionsController
 );
-8
+
+router.put(
+  "/status",
+  auth,
+  validate(updatePermissionStatusSchema),
+  updatePermissionStatusController
+);
 
 // UPDATE
 router.put(
@@ -74,20 +87,10 @@ router.get(
 );
 
 // STATUS UPDATE
-router.put(
-  "/status",
-  auth,
-  validate(updatePermissionStatusSchema),
-  updatePermissionStatusController
-);
 
 
-// SUMMARY
-router.get(
-  "/summary",
-  auth,
-  getPermissionSummaryController
-);
+
+
 
 // --- CONFIGURATION ---
 

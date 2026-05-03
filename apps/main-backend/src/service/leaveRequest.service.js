@@ -246,10 +246,12 @@ const getLeaveByIdService = async (id, user) => {
  */
 const approveLeaveService = async (payload, user) => {
   try {
-    const { id, status, reason } = payload;
+    const { id: _id, status, reason } = payload;
+    console.log(payload, 'po');
 
+    const id = Number(_id)
     const request = await prisma.leaveRequest.findFirst({
-      where: { id: Number(id), companyId: user.companyId },
+      where: { id, companyId: user.companyId },
     });
 
     if (!request) throw new AppError("Leave request not found", 404);
@@ -322,13 +324,28 @@ const getLeaveSummaryService = async (userId, user) => {
     const currentYearStart = new Date(year, 0, 1);
     const currentYearEnd = new Date(year, 11, 31);
 
+    // Fetch the target user to get their gender
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { gender: true }
+    });
+
     // 1. Fetch all leave types and their configs
-    const leaveTypes = await prisma.leaveType.findMany({
+    let leaveTypes = await prisma.leaveType.findMany({
       where: { companyId: user.companyId, isDeleted: false },
       include: {
         configs: { where: { isActive: true, isDeleted: false } },
       },
     });
+
+    // Filter based on gender
+    if (targetUser && targetUser.gender) {
+      leaveTypes = leaveTypes.filter(type => {
+        const config = type.configs[0];
+        if (!config || !config.gender || config.gender === "ALL") return true;
+        return config.gender === targetUser.gender;
+      });
+    }
 
     // 2. Fetch all approved leaves for this year
     const approvedLeaves = await prisma.leaveRequest.findMany({
@@ -346,7 +363,7 @@ const getLeaveSummaryService = async (userId, user) => {
         .filter((l) => l.leaveTypeId === type.id)
         .reduce((sum, l) => sum + l.daysCount, 0);
 
-      const overall = config.yearlyLimit || 0;
+      const overall = (config.monthlyLimit * 12) + (config.yearlyLimit || 0) || 0;
       const avail = Math.max(0, overall - taken);
 
       return {
@@ -354,6 +371,9 @@ const getLeaveSummaryService = async (userId, user) => {
         name: type.name,
         code: type.code,
         overall,
+        monthlyLimit: config.monthlyLimit,
+        yearlyLimit: config.yearlyLimit,
+        canCarryForward: config.canCarryForward,
         taken,
         avail,
       };

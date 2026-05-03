@@ -16,6 +16,7 @@ const {
   updateLeaveTypeController,
   deleteLeaveTypeController,
   listLeaveTypesController,
+  dropdownLeaveTypesController,
 } = require("../controller/leaveConfig.controller");
 
 // CREATE
@@ -40,6 +41,13 @@ router.delete(
   auth,
   validate(idParamSchema, "query"),
   deleteLeaveTypeController
+);
+
+// DROPDOWN
+router.get(
+  "/dropdown",
+  auth,
+  dropdownLeaveTypesController
 );
 
 // LIST
