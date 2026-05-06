@@ -156,8 +156,6 @@ const userProfileUpdateService = async (payload, user) => {
       throw new AppError("user id is required", 400);
     }
 
-
-
     if (!companyId) {
       throw new AppError("you cant create employe without company", 400);
     }
@@ -173,6 +171,10 @@ const userProfileUpdateService = async (payload, user) => {
       throw new AppError("you cant update this user", 400);
     };
 
+
+
+    console.log("sakthi");
+
     delete payload.id;
     const userUpdate = await prisma.user.update({
       where: { id },
@@ -181,10 +183,13 @@ const userProfileUpdateService = async (payload, user) => {
       },
     })
 
+
+
     return userUpdate;
 
   } catch (err) {
 
+    console.log(err, "errr");
     throw catchAsyncPrismaError(err);
   }
 }

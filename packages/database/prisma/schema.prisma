@@ -215,7 +215,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // WorkHoursConfigurationId Int?
+  WorkHoursConfigurationId Int?
   companyId                Int?
   company                  Company?          @relation(fields: [companyId], references: [id])
   role                     Role?             @relation(fields: [roleId], references: [id])
@@ -1055,6 +1055,12 @@ model LeaveType {
   @@index([companyId])
 }
 
+enum LeaveConfigurationGender {
+  ALL
+  MALE
+  FEMALE
+}
+
 model LeaveConfiguration {
   id Int @id @default(autoincrement())
 
@@ -1064,7 +1070,7 @@ model LeaveConfiguration {
   monthlyLimit Float?
   yearlyLimit  Float?
   
-  gender       Gender? // ALL, MALE, FEMALE
+  gender       LeaveConfigurationGender?  
   
   canCarryForward Boolean @default(false)
   maxConsecutiveDays Int?

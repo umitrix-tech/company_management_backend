@@ -85,7 +85,7 @@ const deleteTimeLineService = async (id, user) => {
  */
 const getTimeLineService = async (id, user) => {
   try {
-    const data = await prisma.TimeLine.findFirst({
+    const data = await prisma.timeLine.findFirst({
       where: {
         id: Number(id),
         companyId: user.companyId,
@@ -119,8 +119,8 @@ const listTimeLineService = async (query, user) => {
 
     const skip = (page - 1) * limit;
 
-    if(!user.roleId){
-      throw AppError("your not a valid user to access this")
+    if (!user.roleId) {
+      throw new AppError("your not a valid user to access this")
     }
 
     const where = {
@@ -153,8 +153,8 @@ const listTimeLineService = async (query, user) => {
         orderBy: { date: "desc" },
         skip: Number(skip),
         take: Number(limit),
-        omit:{
-          roleAccess:true
+        omit: {
+          roleAccess: true
         }
       }),
       prisma.timeLine.count({ where }),

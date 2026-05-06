@@ -75,6 +75,7 @@ const createCompanyService = async (payload, user) => {
         id: userDetails.id,
         email: userDetails.email,
         role: ROLE_OWNER,
+        roleId: role.id,
         companyId: responce.id,
         deviceId: user.deviceId,
       },
