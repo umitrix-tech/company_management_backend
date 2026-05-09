@@ -167,6 +167,30 @@ const moduleObj = {
     MODULE: "team_chat_module",
     VIEW: "team_chat_view",
   },
+
+  LEAVE_CONFIG: {
+    MODULE: "leave_config_module",
+    VIEW: "leave_config_view",
+    CREATE: "leave_config_create",
+    UPDATE: "leave_config_update",
+    DELETE: "leave_config_delete",
+  },
+
+  LEAVE_PERMISSION_DASHBOARD: {
+    MODULE: "leave_permission_dashboard_module",
+    VIEW: "leave_permission_dashboard_view",
+    CREATE: "leave_permission_dashboard_create",
+    UPDATE: "leave_permission_dashboard_update",
+    DELETE: "leave_permission_dashboard_delete",
+  },
+
+  LEAVE_REQUEST_PERMISSION: {
+    MODULE: "leave_request_permission_module",
+    VIEW: "leave_request_permission_view",
+    CREATE: "leave_request_permission_create",
+    UPDATE: "leave_request_permission_update",
+    DELETE: "leave_request_permission_delete",
+  },
 };
 
 const screenList = [
@@ -174,7 +198,7 @@ const screenList = [
   {
     key: moduleObj.DASHBOARD.MODULE,
     label: "Dashboard",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.DASHBOARD.VIEW, label: "View Dashboard", access: false },
@@ -191,7 +215,7 @@ const screenList = [
   {
     key: moduleObj.ORGANIZATION.MODULE,
     label: "Organization Hierarchy",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       {
@@ -206,7 +230,7 @@ const screenList = [
   {
     key: moduleObj.TEAM_CHAT.MODULE,
     label: "Team Chat",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.TEAM_CHAT.VIEW, label: "Access Chat", access: false },
@@ -217,7 +241,7 @@ const screenList = [
   {
     key: moduleObj.COMPANY.MODULE,
     label: "Company",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.COMPANY.VIEW, label: "View Company", access: false },
@@ -226,27 +250,27 @@ const screenList = [
   },
 
   {
-  key: moduleObj.COMPANY_FIELDS_ACCESS.MODULE,
-  label: "Company Fields Access",
-  type:"fields_access",
-  access: false,
-  children: [
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.COMPANY_NAME, label: "Company Name", access: false },
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.EMAIL, label: "Email", access: false },
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.PHONE, label: "Phone", access: false },
+    key: moduleObj.COMPANY_FIELDS_ACCESS.MODULE,
+    label: "Company Fields Access",
+    type: "fields_access",
+    access: false,
+    children: [
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.COMPANY_NAME, label: "Company Name", access: false },
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.EMAIL, label: "Email", access: false },
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.PHONE, label: "Phone", access: false },
 
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.GST_NUMBER, label: "GST Number", access: false },
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.PAN_NUMBER, label: "PAN Number", access: false },
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.ESIC_NUMBER, label: "ESIC Number", access: false },
-    { key: moduleObj.COMPANY_FIELDS_ACCESS.EPF_NUMBER, label: "EPF Number", access: false },
-  ]
-},
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.GST_NUMBER, label: "GST Number", access: false },
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.PAN_NUMBER, label: "PAN Number", access: false },
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.ESIC_NUMBER, label: "ESIC Number", access: false },
+      { key: moduleObj.COMPANY_FIELDS_ACCESS.EPF_NUMBER, label: "EPF Number", access: false },
+    ]
+  },
 
   // Employee
   {
     key: moduleObj.EMPLOYEE.MODULE,
     label: "Employee",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.EMPLOYEE.VIEW, label: "View Employees", access: false },
@@ -270,7 +294,7 @@ const screenList = [
 
   {
     key: moduleObj.EMPLOYEE_FIELDS_ACCESS.MODULE,
-    type:"fields_access",
+    type: "fields_access",
     label: "Employee Fields Access",
     access: true,
     children: [
@@ -345,7 +369,7 @@ const screenList = [
   {
     key: moduleObj.ROLE.MODULE,
     label: "Role Management",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.ROLE.VIEW, label: "View Roles", access: false },
@@ -359,7 +383,7 @@ const screenList = [
   {
     key: moduleObj.PROFILE.MODULE,
     label: "Profile",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.PROFILE.VIEW, label: "View Profile", access: false },
@@ -371,7 +395,7 @@ const screenList = [
   {
     key: moduleObj.SETTINGS.MODULE,
     label: "Settings",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.SETTINGS.VIEW, label: "View Settings", access: false },
@@ -397,7 +421,7 @@ const screenList = [
   {
     key: moduleObj.HOLIDAY.MODULE,
     label: "Holiday",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.HOLIDAY.VIEW, label: "View Holiday", access: false },
@@ -411,7 +435,7 @@ const screenList = [
   {
     key: moduleObj.TIMELINE.MODULE,
     label: "Timeline",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.TIMELINE.VIEW, label: "View Timeline", access: false },
@@ -437,7 +461,7 @@ const screenList = [
   {
     key: moduleObj.POLICIES.MODULE,
     label: "Policies",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.POLICIES.VIEW, label: "View Policies", access: false },
@@ -456,7 +480,7 @@ const screenList = [
   {
     key: moduleObj.LOAN.MODULE,
     label: "Loan",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.LOAN.VIEW, label: "View Loan", access: false },
@@ -470,7 +494,7 @@ const screenList = [
   {
     key: moduleObj.PUNCH_INFO.MODULE,
     label: "Self Punch Info",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       {
@@ -484,7 +508,7 @@ const screenList = [
   {
     key: moduleObj.EMPLOYEE_PUNCH_INFO.MODULE,
     label: "Employee Punch Info",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       {
@@ -509,7 +533,7 @@ const screenList = [
   {
     key: moduleObj.NOTES.MODULE,
     label: "Notes",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.NOTES.VIEW, label: "View Notes", access: false },
@@ -523,7 +547,7 @@ const screenList = [
   {
     key: moduleObj.GALLERY.MODULE,
     label: "Gallery",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       { key: moduleObj.GALLERY.VIEW, label: "View Gallery", access: false },
@@ -537,7 +561,7 @@ const screenList = [
   {
     key: moduleObj.SUBSCRIPTION.MODULE,
     label: "Subscription",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       {
@@ -557,7 +581,7 @@ const screenList = [
   {
     key: moduleObj.SALARY.MODULE,
     label: "Salary Template",
-    type:"module_access",
+    type: "module_access",
     access: false,
     children: [
       {
@@ -582,17 +606,59 @@ const screenList = [
       },
     ],
   },
+
+  // Leave Configuration
+  {
+    key: moduleObj.LEAVE_CONFIG.MODULE,
+    label: "Leave Configuration",
+    type: "module_access",
+    access: false,
+    children: [
+      { key: moduleObj.LEAVE_CONFIG.VIEW, label: "View Leave Configuration", access: false },
+      { key: moduleObj.LEAVE_CONFIG.CREATE, label: "Create Leave Configuration", access: false },
+      { key: moduleObj.LEAVE_CONFIG.UPDATE, label: "Update Leave Configuration", access: false },
+      { key: moduleObj.LEAVE_CONFIG.DELETE, label: "Delete Leave Configuration", access: false },
+    ],
+  },
+
+  // Leave & Permission Dashboard
+  {
+    key: moduleObj.LEAVE_PERMISSION_DASHBOARD.MODULE,
+    label: "Leave & Permission Dashboard",
+    type: "module_access",
+    access: false,
+    children: [
+      { key: moduleObj.LEAVE_PERMISSION_DASHBOARD.VIEW, label: "View Leave & Permission Dashboard", access: false },
+      { key: moduleObj.LEAVE_PERMISSION_DASHBOARD.CREATE, label: "Create Leave & Permission Dashboard", access: false },
+      { key: moduleObj.LEAVE_PERMISSION_DASHBOARD.UPDATE, label: "Update Leave & Permission Dashboard", access: false },
+      { key: moduleObj.LEAVE_PERMISSION_DASHBOARD.DELETE, label: "Delete Leave & Permission Dashboard", access: false },
+    ],
+  },
+
+  // Leave & Permission Request
+  {
+    key: moduleObj.LEAVE_REQUEST_PERMISSION.MODULE,
+    label: "Leave & Permission Request",
+    type: "module_access",
+    access: false,
+    children: [
+      { key: moduleObj.LEAVE_REQUEST_PERMISSION.VIEW, label: "View Leave & Permission Request", access: false },
+      { key: moduleObj.LEAVE_REQUEST_PERMISSION.CREATE, label: "Create Leave & Permission Request", access: false },
+      { key: moduleObj.LEAVE_REQUEST_PERMISSION.UPDATE, label: "Update Leave & Permission Request", access: false },
+      { key: moduleObj.LEAVE_REQUEST_PERMISSION.DELETE, label: "Delete Leave & Permission Request", access: false },
+    ],
+  },
 ];
 
 module.exports = {
-    ROLE_OWNER: "Owner",
-    ROLE_CUSTOMER: "Customer",
-    TEMP_PASSWORD: "Test@123",
-    USER_BACKEND_STATUS: {
-        "only_login": "only_login",
-        "company_created": "company_created",
-    },
-    //Role info
-    moduleAccess: moduleObj,
-    screenRoleInfo: screenList
+  ROLE_OWNER: "Owner",
+  ROLE_CUSTOMER: "Customer",
+  TEMP_PASSWORD: "Test@123",
+  USER_BACKEND_STATUS: {
+    "only_login": "only_login",
+    "company_created": "company_created",
+  },
+  //Role info
+  moduleAccess: moduleObj,
+  screenRoleInfo: screenList
 };
