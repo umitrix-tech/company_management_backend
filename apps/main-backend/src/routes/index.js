@@ -20,6 +20,7 @@ router.use('/hierarchy', require('./hierarchy'));
 
 router.use("/ai", require("./ai"));
 router.use("/salary-template", require("./salaryTemplate"));
+router.use("/salary", require("./salary.route"))
 router.use("/employee-salary", require("./employeeSalary.route"));
 router.use("/call", require("./call.route"));
 router.use("/dashboard", require("./dashboard.route"));
