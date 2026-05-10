@@ -30,5 +30,6 @@ router.use("/leave-config", require("./leaveConfig"));
 router.use("/leave", require("./leaveRequest"));
 router.use("/permission", require("./permissionRequest"));
 router.use("/notification", require("./notification.route"));
+router.use("/payroll-cycle", require("./payrollCycle.route"));
 
 module.exports = router;
